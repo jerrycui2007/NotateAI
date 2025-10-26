@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where:*)",
+      "Bash(cmake --version:*)",
+      "Bash($env:PATH)",
+      "Bash(test:*)",
+      "Bash(cmake:*)",
+      "Bash(git --version:*)",
+      "Read(//c/Qt/Tools/mingw1310_64/bin/**)",
+      "Bash(cat:*)",
+      "Bash(mingw32-make:*)",
+      "Bash(\"C:\\Program Files\\CMake\\bin\\cmake.exe\" --version)",
+      "Bash(C:Strawberrycbincmake.exe --version)",
+      "Bash(git clone:*)",
+      "Bash(C:/Qt/Tools/mingw1310_64/bin/mingw32-make.exe --version)",
+      "Bash(echo:*)",
+      "Bash(Get-Command qmake -ErrorAction SilentlyContinue)",
+      "Bash(Get-Command qmake6 -ErrorAction SilentlyContinue)",
+      "Read(//c/Qt/**)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/build/Win-Qt6.9.3-mingw_64-MinGW-RelWithDebInfo/CMakeFiles/**)",
+      "Read(//c/build/Win-Qt6.9.3-mingw_64-MinGW-RelWithDebInfo/**)",
+      "Read(//c/build/Win-Qt6.9.3-msvc2022_64-VS17-RelWithDebInfo/install/bin/**)",
+      "Bash(./MuseScore4.exe:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
