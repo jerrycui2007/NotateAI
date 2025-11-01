@@ -22,7 +22,8 @@
       "Read(//c/build/Win-Qt6.9.3-mingw_64-MinGW-RelWithDebInfo/CMakeFiles/**)",
       "Read(//c/build/Win-Qt6.9.3-mingw_64-MinGW-RelWithDebInfo/**)",
       "Read(//c/build/Win-Qt6.9.3-msvc2022_64-VS17-RelWithDebInfo/install/bin/**)",
-      "Bash(./MuseScore4.exe:*)"
+      "Bash(./MuseScore4.exe:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

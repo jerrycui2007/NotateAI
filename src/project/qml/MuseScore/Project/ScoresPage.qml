@@ -88,13 +88,33 @@ FocusScope {
             accessible.name: qsTrc("project", "Scores")
         }
 
-        StyledTextLabel {
-            id: pageTitle
+        ColumnLayout {
             Layout.fillWidth: true
+            spacing: 8
 
-            text: qsTrc("project", "Scores")
-            font: ui.theme.titleBoldFont
-            horizontalAlignment: Text.AlignLeft
+            StyledTextLabel {
+                id: pageTitle
+                Layout.fillWidth: true
+
+                text: qsTrc("project", "Scores")
+                font: ui.theme.titleBoldFont
+                horizontalAlignment: Text.AlignLeft
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 40
+                color: "#FF6B35"
+                radius: 4
+
+                StyledTextLabel {
+                    anchors.centerIn: parent
+                    text: "NotateAI Enabled"
+                    font.pixelSize: 16
+                    font.bold: true
+                    color: "#FFFFFF"
+                }
+            }
         }
 
         SearchField {
