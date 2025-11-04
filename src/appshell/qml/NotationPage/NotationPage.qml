@@ -330,6 +330,31 @@ DockPage {
         },
 
         DockPanel {
+            id: notateAIPanel
+
+            objectName: root.pageModel.notateAIPanelName()
+            title: qsTrc("appshell", "NotateAI")
+
+            navigationSection: root.navigationPanelSec(notateAIPanel.location)
+
+            width: root.verticalPanelDefaultWidth
+            minimumWidth: root.verticalPanelDefaultWidth
+            maximumWidth: root.verticalPanelDefaultWidth
+
+            minimumHeight: root.panelMinDimension
+            maximumHeight: root.panelMaxDimension
+
+            groupName: root.verticalPanelsGroup
+
+            dropDestinations: root.verticalPanelDropDestinations
+
+            NotateAIPanel {
+                navigationSection: notateAIPanel.navigationSection
+                navigationOrderStart: notateAIPanel.contentNavigationPanelOrderStart
+            }
+        },
+
+        DockPanel {
             id: selectionFilterPanel
 
             objectName: root.pageModel.selectionFiltersPanelName()

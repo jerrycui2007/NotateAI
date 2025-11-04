@@ -7,6 +7,7 @@
         <file>qml/DevTools/DevToolsMenu.qml</file>
         <file>qml/DevTools/Preferences/SettingsPage.qml</file>
         <file>qml/NotationPage/NotationStatusBar.qml</file>
+        <file>qml/NotationPage/NotateAIPanel.qml</file>
         <file>qml/HomePage/PluginsPage.qml</file>
         <file>qml/DevTools/Gallery/GeneralComponentsGallery.qml</file>
         <file>qml/DevTools/CrashHandler/CrashHandlerDevTools.qml</file>

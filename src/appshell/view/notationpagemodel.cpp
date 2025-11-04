@@ -134,6 +134,11 @@ QString NotationPageModel::inspectorPanelName() const
     return INSPECTOR_PANEL_NAME;
 }
 
+QString NotationPageModel::notateAIPanelName() const
+{
+    return NOTATE_AI_PANEL_NAME;
+}
+
 QString NotationPageModel::selectionFiltersPanelName() const
 {
     return SELECTION_FILTERS_PANEL_NAME;
