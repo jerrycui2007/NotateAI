@@ -32,15 +32,79 @@ Item {
     property NavigationSection navigationSection: null
     property int navigationOrderStart: 1
 
-    // Blank panel - content will be added later
     Rectangle {
         anchors.fill: parent
         color: ui.theme.backgroundPrimaryColor
 
-        StyledTextLabel {
-            anchors.centerIn: parent
-            text: qsTrc("appshell", "NotateAI")
-            font: ui.theme.headerBoldFont
+        Column {
+            anchors.fill: parent
+
+            // Chat messages area (empty for now)
+            Rectangle {
+                id: messagesArea
+                width: parent.width
+                height: parent.height - inputArea.height
+                color: ui.theme.backgroundPrimaryColor
+
+                // Placeholder for future chat messages
+            }
+
+            // Input area at the bottom
+            Rectangle {
+                id: inputArea
+                width: parent.width
+                height: Math.min(200, Math.max(60, textArea.contentHeight + 48))
+                color: ui.theme.backgroundSecondaryColor
+
+                Row {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 8
+                    anchors.bottomMargin: 8
+
+                    // Text input field
+                    Rectangle {
+                        width: parent.width - sendButton.width - parent.spacing
+                        height: parent.height
+                        color: ui.theme.textFieldColor
+                        border.color: ui.theme.strokeColor
+                        border.width: 1
+                        radius: 4
+
+                        ScrollView {
+                            anchors.fill: parent
+                            anchors.margins: 8
+                            clip: true
+
+                            TextArea {
+                                id: textArea
+                                width: parent.width
+                                wrapMode: TextArea.Wrap
+                                font: ui.theme.bodyFont
+                                color: ui.theme.fontPrimaryColor
+                                background: null
+                                selectByMouse: true
+
+                                placeholderText: qsTrc("appshell", "Type a message...")
+                                placeholderTextColor: ui.theme.fontSecondaryColor
+                            }
+                        }
+                    }
+
+                    // Send button (up arrow)
+                    FlatButton {
+                        id: sendButton
+                        width: 44
+                        height: 44
+                        anchors.bottom: parent.bottom
+                        icon: IconCode.ARROW_UP
+
+                        onClicked: {
+                            // Placeholder - does nothing for now
+                        }
+                    }
+                }
+            }
         }
     }
 }
