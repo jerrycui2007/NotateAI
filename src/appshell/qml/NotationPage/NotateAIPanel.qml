@@ -32,6 +32,21 @@ Item {
     property NavigationSection navigationSection: null
     property int navigationOrderStart: 1
 
+    // Chat message model
+    ListModel {
+        id: chatMessagesModel
+    }
+
+    // Function to add a message
+    function addMessage(text, isUser) {
+        chatMessagesModel.append({
+            "messageText": text,
+            "isUserMessage": isUser
+        })
+        // Scroll to bottom after adding message
+        messagesView.positionViewAtEnd()
+    }
+
     Rectangle {
         anchors.fill: parent
         color: ui.theme.backgroundPrimaryColor
@@ -39,14 +54,44 @@ Item {
         Column {
             anchors.fill: parent
 
-            // Chat messages area (empty for now)
+            // Chat messages area
             Rectangle {
                 id: messagesArea
                 width: parent.width
                 height: parent.height - inputArea.height
                 color: ui.theme.backgroundPrimaryColor
 
-                // Placeholder for future chat messages
+                ScrollView {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    clip: true
+
+                    ListView {
+                        id: messagesView
+                        width: parent.width
+                        spacing: 8
+                        model: chatMessagesModel
+
+                        delegate: Rectangle {
+                            width: messagesView.width
+                            height: messageTextItem.implicitHeight + 16
+                            color: model.isUserMessage ? ui.theme.backgroundSecondaryColor : ui.theme.backgroundTertiaryColor
+                            radius: 8
+
+                            Text {
+                                id: messageTextItem
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.margins: 8
+                                text: model.messageText
+                                wrapMode: Text.Wrap
+                                font: ui.theme.bodyFont
+                                color: ui.theme.fontPrimaryColor
+                            }
+                        }
+                    }
+                }
             }
 
             // Input area at the bottom
@@ -100,7 +145,16 @@ Item {
                         icon: IconCode.ARROW_UP
 
                         onClicked: {
-                            // Placeholder - does nothing for now
+                            var message = textArea.text.trim()
+                            if (message.length > 0) {
+                                // Add user message
+                                root.addMessage(message, true)
+
+                                // Clear text box
+                                textArea.text = ""
+
+                                // TODO: Backend communication for received messages will be added here
+                            }
                         }
                     }
                 }
