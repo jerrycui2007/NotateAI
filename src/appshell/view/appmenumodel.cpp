@@ -301,6 +301,7 @@ MenuItem* AppMenuModel::makeViewMenu()
         makeMenuItem("masterpalette"),
         makeMenuItem("toggle-instruments"),
         makeMenuItem("inspector"),
+        makeMenuItem("toggle-notate-ai"),
         makeMenuItem("toggle-selection-filter"),
         historyItem,
         makeMenuItem("toggle-navigator"),

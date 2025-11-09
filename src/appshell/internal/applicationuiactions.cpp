@@ -139,6 +139,13 @@ const UiActionList ApplicationUiActions::m_actions = {
              TranslatableString("action", "Show/hide properties"),
              Checkable::Yes
              ),
+    UiAction("toggle-notate-ai",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_ANY,
+             TranslatableString("action", "&NotateAI"),
+             TranslatableString("action", "Show/hide NotateAI panel"),
+             Checkable::Yes
+             ),
     UiAction("toggle-selection-filter",
              mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_OPENED,
@@ -382,6 +389,7 @@ const QMap<ActionCode, DockName>& ApplicationUiActions::toggleDockActions()
         { "toggle-palettes", PALETTES_PANEL_NAME },
         { "toggle-instruments", LAYOUT_PANEL_NAME },
         { "inspector", INSPECTOR_PANEL_NAME },
+        { "toggle-notate-ai", NOTATE_AI_PANEL_NAME },
         { "toggle-selection-filter", SELECTION_FILTERS_PANEL_NAME },
         { "toggle-undo-history-panel", UNDO_HISTORY_PANEL_NAME },
 

@@ -75,7 +75,7 @@ Item {
                         delegate: Rectangle {
                             width: messagesView.width
                             height: messageTextItem.implicitHeight + 16
-                            color: model.isUserMessage ? ui.theme.backgroundSecondaryColor : ui.theme.backgroundTertiaryColor
+                            color: model.isUserMessage ? ui.theme.backgroundSecondaryColor : "transparent"
                             radius: 8
 
                             Text {
@@ -153,7 +153,11 @@ Item {
                                 // Clear text box
                                 textArea.text = ""
 
-                                // TODO: Backend communication for received messages will be added here
+                                // Placeholder: simulate AI response
+                                // TODO: Replace with actual backend communication
+                                Qt.callLater(function() {
+                                    root.addMessage("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.", false)
+                                })
                             }
                         }
                     }
