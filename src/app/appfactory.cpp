@@ -196,6 +196,8 @@
 #include "stubs/musesounds/musesoundsstubmodule.h"
 #endif
 
+#include "notateai/notateaimodule.h"
+
 #ifdef MUE_BUILD_NOTATION_MODULE
 #include "notation/notationmodule.h"
 #else
@@ -358,6 +360,7 @@ std::shared_ptr<muse::IApplication> AppFactory::newGuiApp(const CmdOptions& opti
     app->addModule(new muse::learn::LearnModule());
     app->addModule(new muse::mi::MultiInstancesModule());
     app->addModule(new mu::musesounds::MuseSoundsModule());
+    app->addModule(new mu::notateai::NotateAIModule());
     app->addModule(new mu::notation::NotationModule());
     app->addModule(new mu::palette::PaletteModule());
     app->addModule(new mu::playback::PlaybackModule());
@@ -498,6 +501,7 @@ std::shared_ptr<muse::IApplication> AppFactory::newConsoleApp(const CmdOptions& 
     app->addModule(new muse::languages::LanguagesModule());
     app->addModule(new muse::learn::LearnModule());
     app->addModule(new muse::mi::MultiInstancesModule());
+    app->addModule(new mu::notateai::NotateAIModule());
     app->addModule(new mu::notation::NotationModule());
     app->addModule(new mu::palette::PaletteModule());
     app->addModule(new mu::playback::PlaybackModule());

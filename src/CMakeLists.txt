@@ -65,6 +65,8 @@ if (MUE_BUILD_MUSESOUNDS_MODULE)
     add_subdirectory(musesounds)
 endif()
 
+add_subdirectory(notateai)
+
 if (MUE_BUILD_NOTATION_MODULE)
     add_subdirectory(notation)
 endif()

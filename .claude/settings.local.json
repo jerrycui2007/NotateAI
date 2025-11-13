@@ -31,7 +31,8 @@
       "Bash(.gitignore)",
       "Bash(powershell -Command \"Remove-Item -LiteralPath ''\\?\\C:\\CodingProjects\\NotateAI\\NotateAI\\nul'' -Force\")",
       "Bash(powershell -Command \"Remove-Item -LiteralPath ''\\\\?\\C:\\CodingProjects\\NotateAI\\NotateAI\\nul'' -Force\")",
-      "Bash(powershell -Command \"[System.IO.File]::Delete(''\\\\?\\C:\\CodingProjects\\NotateAI\\NotateAI\\nul'')\")"
+      "Bash(powershell -Command \"[System.IO.File]::Delete(''\\\\?\\C:\\CodingProjects\\NotateAI\\NotateAI\\nul'')\")",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

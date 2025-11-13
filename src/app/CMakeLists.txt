@@ -126,6 +126,7 @@ set(LINK_LIB
     engraving
     context
     notation
+    notateai
     project
     commonscene
     palette
