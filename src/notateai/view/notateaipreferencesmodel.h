@@ -19,34 +19,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATEAI_NOTATEAIMODULE_H
-#define MU_NOTATEAI_NOTATEAIMODULE_H
+#ifndef MU_NOTATEAI_NOTATEAIPREFERENCESMODEL_H
+#define MU_NOTATEAI_NOTATEAIPREFERENCESMODEL_H
 
-#include <memory>
+#include <QObject>
 
-#include "modularity/imodulesetup.h"
+#include "modularity/ioc.h"
+#include "../inotateaiconfiguration.h"
 
 namespace mu::notateai {
-class NotateAIConfiguration;
-
-class NotateAIModule : public muse::modularity::IModuleSetup
+class NotateAIPreferencesModel : public QObject, public muse::Injectable
 {
+    Q_OBJECT
+
+    Q_PROPERTY(QString geminiApiKey READ geminiApiKey WRITE setGeminiApiKey NOTIFY geminiApiKeyChanged)
+
+    muse::Inject<INotateAIConfiguration> configuration = { this };
+
 public:
-    std::string moduleName() const override;
+    explicit NotateAIPreferencesModel(QObject* parent = nullptr);
 
-    void registerExports() override;
-    void resolveImports() override;
+    Q_INVOKABLE void load();
+    Q_INVOKABLE QString geminiApiKeyUrl() const;
 
-    void registerResources() override;
-    void registerUiTypes() override;
+    QString geminiApiKey() const;
 
-    void onInit(const muse::IApplication::RunMode& mode) override;
-    void onAllInited(const muse::IApplication::RunMode& mode) override;
-    void onDeinit() override;
+public slots:
+    void setGeminiApiKey(const QString& key);
+
+signals:
+    void geminiApiKeyChanged(const QString& key);
 
 private:
-    std::shared_ptr<NotateAIConfiguration> m_configuration;
+    QString m_geminiApiKey;
 };
 }
 
-#endif // MU_NOTATEAI_NOTATEAIMODULE_H
+#endif // MU_NOTATEAI_NOTATEAIPREFERENCESMODEL_H

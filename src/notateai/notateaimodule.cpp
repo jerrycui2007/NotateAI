@@ -21,9 +21,16 @@
  */
 #include "notateaimodule.h"
 
+#include <QtQml>
+
 #include "log.h"
 
 #include "modularity/ioc.h"
+
+#include "internal/notateaiconfiguration.h"
+#include "inotateaiconfiguration.h"
+#include "view/notateaipanelmodel.h"
+#include "view/notateaipreferencesmodel.h"
 
 using namespace mu::notateai;
 using namespace muse;
@@ -36,7 +43,8 @@ std::string NotateAIModule::moduleName() const
 
 void NotateAIModule::registerExports()
 {
-    // Future: Configuration and service exports will be registered here
+    m_configuration = std::make_shared<NotateAIConfiguration>(iocContext());
+    ioc()->registerExport<INotateAIConfiguration>(moduleName(), m_configuration);
 }
 
 void NotateAIModule::resolveImports()
@@ -51,7 +59,8 @@ void NotateAIModule::registerResources()
 
 void NotateAIModule::registerUiTypes()
 {
-    // Future: QML types will be registered here (e.g., NotateAIPanelModel)
+    qmlRegisterType<NotateAIPanelModel>("MuseScore.NotateAI", 1, 0, "NotateAIPanelModel");
+    qmlRegisterType<NotateAIPreferencesModel>("MuseScore.NotateAI", 1, 0, "NotateAIPreferencesModel");
 }
 
 void NotateAIModule::onInit(const IApplication::RunMode& mode)
@@ -60,7 +69,7 @@ void NotateAIModule::onInit(const IApplication::RunMode& mode)
         return;
     }
 
-    // Future: Initialize configuration and services here
+    m_configuration->init();
     LOGI() << "NotateAI module initialized";
 }
 

@@ -32,7 +32,13 @@
       "Bash(powershell -Command \"Remove-Item -LiteralPath ''\\?\\C:\\CodingProjects\\NotateAI\\NotateAI\\nul'' -Force\")",
       "Bash(powershell -Command \"Remove-Item -LiteralPath ''\\\\?\\C:\\CodingProjects\\NotateAI\\NotateAI\\nul'' -Force\")",
       "Bash(powershell -Command \"[System.IO.File]::Delete(''\\\\?\\C:\\CodingProjects\\NotateAI\\NotateAI\\nul'')\")",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(if not exist \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\internal\" mkdir \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\internal\")",
+      "Bash(if not exist \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\view\" mkdir \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\view\")",
+      "Bash(New-Item -ItemType Directory -Force -Path \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\view\")",
+      "Bash(mkdir:*)",
+      "Bash(if not exist \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\qml\" mkdir \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\qml\")",
+      "Bash(New-Item -ItemType Directory -Force -Path \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\qml\")"
     ],
     "deny": [],
     "ask": []

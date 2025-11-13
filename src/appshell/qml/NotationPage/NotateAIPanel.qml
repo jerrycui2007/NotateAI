@@ -25,12 +25,26 @@ import QtQuick.Controls 2.15
 
 import Muse.Ui 1.0
 import Muse.UiComponents 1.0
+import MuseScore.NotateAI 1.0
 
 Item {
     id: root
 
     property NavigationSection navigationSection: null
     property int navigationOrderStart: 1
+
+    // NotateAI Panel Model
+    NotateAIPanelModel {
+        id: panelModel
+
+        onMessageReceived: function(aiResponse) {
+            root.addMessage(aiResponse, false)
+        }
+
+        onErrorOccurred: function(errorMessage) {
+            root.addMessage("Error: " + errorMessage, false)
+        }
+    }
 
     // Chat message model
     ListModel {
@@ -90,6 +104,36 @@ Item {
                                 color: ui.theme.fontPrimaryColor
                             }
                         }
+
+                        footer: Item {
+                            width: messagesView.width
+                            height: panelModel.isLoading ? 40 : 0
+                            visible: panelModel.isLoading
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 4
+
+                                Repeater {
+                                    model: 3
+                                    Rectangle {
+                                        width: 8
+                                        height: 8
+                                        radius: 4
+                                        color: ui.theme.fontSecondaryColor
+                                        opacity: 0.3
+
+                                        SequentialAnimation on opacity {
+                                            running: panelModel.isLoading
+                                            loops: Animation.Infinite
+                                            PauseAnimation { duration: index * 200 }
+                                            NumberAnimation { from: 0.3; to: 1.0; duration: 600 }
+                                            NumberAnimation { from: 1.0; to: 0.3; duration: 600 }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -143,6 +187,7 @@ Item {
                         height: 44
                         anchors.bottom: parent.bottom
                         icon: IconCode.ARROW_UP
+                        enabled: !panelModel.isLoading && textArea.text.trim().length > 0
 
                         onClicked: {
                             var message = textArea.text.trim()
@@ -153,11 +198,8 @@ Item {
                                 // Clear text box
                                 textArea.text = ""
 
-                                // Placeholder: simulate AI response
-                                // TODO: Replace with actual backend communication
-                                Qt.callLater(function() {
-                                    root.addMessage("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.", false)
-                                })
+                                // Send message to backend
+                                panelModel.sendMessage(message)
                             }
                         }
                     }

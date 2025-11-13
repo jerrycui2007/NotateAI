@@ -20,15 +20,29 @@
 
 declare_module(notateai)
 
+set(MODULE_QRC notateai.qrc)
+set(MODULE_QML_IMPORT ${CMAKE_CURRENT_LIST_DIR}/qml)
+
 set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/notateaimodule.cpp
     ${CMAKE_CURRENT_LIST_DIR}/notateaimodule.h
     ${CMAKE_CURRENT_LIST_DIR}/notateaitypes.h
+    ${CMAKE_CURRENT_LIST_DIR}/inotateaiconfiguration.h
+    ${CMAKE_CURRENT_LIST_DIR}/internal/notateaiconfiguration.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/internal/notateaiconfiguration.h
+    ${CMAKE_CURRENT_LIST_DIR}/internal/geminiservice.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/internal/geminiservice.h
+    ${CMAKE_CURRENT_LIST_DIR}/view/notateaipanelmodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/view/notateaipanelmodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/view/notateaipreferencesmodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/view/notateaipreferencesmodel.h
     )
 
 set(MODULE_LINK
     muse::uicomponents
+    muse::network
     Qt::Quick
+    Qt::Concurrent
     )
 
 setup_module()

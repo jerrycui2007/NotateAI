@@ -19,34 +19,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATEAI_NOTATEAIMODULE_H
-#define MU_NOTATEAI_NOTATEAIMODULE_H
+#ifndef MU_NOTATEAI_INOTATEAICONFIGURATION_H
+#define MU_NOTATEAI_INOTATEAICONFIGURATION_H
 
-#include <memory>
+#include <QString>
 
-#include "modularity/imodulesetup.h"
+#include "modularity/imoduleinterface.h"
 
 namespace mu::notateai {
-class NotateAIConfiguration;
-
-class NotateAIModule : public muse::modularity::IModuleSetup
+class INotateAIConfiguration : MODULE_EXPORT_INTERFACE
 {
+    INTERFACE_ID(INotateAIConfiguration)
+
 public:
-    std::string moduleName() const override;
+    virtual ~INotateAIConfiguration() = default;
 
-    void registerExports() override;
-    void resolveImports() override;
-
-    void registerResources() override;
-    void registerUiTypes() override;
-
-    void onInit(const muse::IApplication::RunMode& mode) override;
-    void onAllInited(const muse::IApplication::RunMode& mode) override;
-    void onDeinit() override;
-
-private:
-    std::shared_ptr<NotateAIConfiguration> m_configuration;
+    virtual QString geminiApiKey() const = 0;
+    virtual void setGeminiApiKey(const QString& key) = 0;
 };
 }
 
-#endif // MU_NOTATEAI_NOTATEAIMODULE_H
+#endif // MU_NOTATEAI_INOTATEAICONFIGURATION_H
