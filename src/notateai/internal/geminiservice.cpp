@@ -31,6 +31,8 @@
 #include <QNetworkReply>
 #include <QEventLoop>
 #include <QTimer>
+#include <chrono>
+#include <thread>
 
 #include "global/concurrency/concurrent.h"
 #include "log.h"
@@ -41,18 +43,23 @@ using namespace muse::network;
 
 static const QString GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
-async::Channel<GeminiService::GeminiResponse> GeminiService::sendMessage(const QString& userMessage)
+void GeminiService::sendMessage(const QString& userMessage)
 {
-    async::Channel<GeminiResponse> responseChannel;
+    LOGI() << "GeminiService::sendMessage called with message: " << userMessage;
 
-    auto callback = [responseChannel](GeminiResponse response) mutable {
-        responseChannel.send(response);
-        responseChannel.close();
+    auto callback = [this](GeminiResponse response) {
+        LOGI() << "Callback lambda invoked! Success: " << response.success;
+        LOGI() << "Callback: About to emit responseReceived signal";
+
+        // Emit the signal - Qt will handle cross-thread communication automatically
+        emit responseReceived(response);
+
+        LOGI() << "Callback: responseReceived signal emitted";
     };
 
+    LOGI() << "Starting concurrent task...";
     Concurrent::run(this, &GeminiService::th_sendMessageDirect, userMessage, callback);
-
-    return responseChannel;
+    LOGI() << "Concurrent task started";
 }
 
 void GeminiService::th_sendMessage(const QString& userMessage, std::function<void(GeminiResponse)> callback) const
@@ -399,9 +406,13 @@ void GeminiService::th_sendMessageDirect(const QString& userMessage, std::functi
 
     if (response.success) {
         LOGI() << "Successfully received AI response";
+        LOGI() << "AI Response text: " << response.responseText;
+        LOGD() << "Response text length: " << response.responseText.length() << " characters";
     } else {
         LOGW() << "API returned error: " << response.errorMessage;
     }
 
+    LOGD() << "About to call callback with response (success=" << response.success << ")";
     callback(response);
+    LOGD() << "Callback invoked successfully";
 }

@@ -21,6 +21,10 @@
  */
 #include "notateaipanelmodel.h"
 
+#include <QThread>
+#include <QCoreApplication>
+#include <QMetaObject>
+
 #include "log.h"
 
 using namespace mu::notateai;
@@ -29,6 +33,14 @@ NotateAIPanelModel::NotateAIPanelModel(QObject* parent)
     : QObject(parent), muse::Injectable(muse::iocCtxForQmlObject(this))
 {
     m_geminiService = new GeminiService(iocContext());
+
+    // Connect to the GeminiService's responseReceived signal
+    // Qt::QueuedConnection ensures the slot is called on this object's thread (main thread)
+    connect(m_geminiService, &GeminiService::responseReceived,
+            this, &NotateAIPanelModel::handleGeminiResponse,
+            Qt::QueuedConnection);
+
+    LOGI() << "NotateAIPanelModel: Connected to GeminiService responseReceived signal";
 }
 
 bool NotateAIPanelModel::isLoading() const
@@ -38,7 +50,8 @@ bool NotateAIPanelModel::isLoading() const
 
 void NotateAIPanelModel::sendMessage(const QString& message)
 {
-    LOGD() << "NotateAIPanelModel::sendMessage called with message: " << message;
+    LOGI() << "========================================";
+    LOGI() << "NotateAIPanelModel::sendMessage called with message: " << message;
 
     if (m_isLoading) {
         LOGW() << "Already loading, ignoring new request";
@@ -56,27 +69,36 @@ void NotateAIPanelModel::sendMessage(const QString& message)
     m_isLoading = true;
     emit isLoadingChanged();
 
-    LOGD() << "Sending message to Gemini service...";
+    LOGI() << "Sending message to Gemini service (via Qt signal/slot)...";
 
     // Send message to Gemini service
-    muse::async::Channel<GeminiService::GeminiResponse> responseChannel = m_geminiService->sendMessage(message);
+    // The response will be received via the responseReceived signal connection
+    m_geminiService->sendMessage(message);
 
-    responseChannel.onReceive(this, [this](const GeminiService::GeminiResponse& response) {
-        LOGD() << "Received response from Gemini service";
-        handleGeminiResponse(response);
-    });
+    LOGI() << "Message sent to GeminiService";
+    LOGI() << "========================================";
 }
 
 void NotateAIPanelModel::handleGeminiResponse(const GeminiService::GeminiResponse& response)
 {
+    LOGI() << "!!!!! handleGeminiResponse CALLED !!!!!";
+    LOGI() << "handleGeminiResponse called on thread: " << QThread::currentThread();
+    LOGI() << "Main thread is: " << QCoreApplication::instance()->thread();
+    LOGI() << "This object's thread is: " << this->thread();
+
+    // Qt::QueuedConnection in the connect() call ensures we're already on the main thread
     m_isLoading = false;
     emit isLoadingChanged();
 
     if (response.success) {
-        LOGD() << "Successfully received AI response: " << response.responseText;
+        LOGI() << "Successfully received AI response, emitting to QML: " << response.responseText;
         emit messageReceived(response.responseText);
+        LOGI() << "messageReceived signal emitted to QML";
     } else {
         LOGW() << "Error from Gemini service: " << response.errorMessage;
         emit errorOccurred(response.errorMessage);
+        LOGI() << "errorOccurred signal emitted to QML";
     }
+
+    LOGI() << "handleGeminiResponse finished";
 }

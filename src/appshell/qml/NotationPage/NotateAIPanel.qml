@@ -38,10 +38,14 @@ Item {
         id: panelModel
 
         onMessageReceived: function(aiResponse) {
+            console.log("QML: onMessageReceived signal received, response length:", aiResponse.length)
+            console.log("QML: AI Response text:", aiResponse)
             root.addMessage(aiResponse, false)
+            console.log("QML: Message added to chat")
         }
 
         onErrorOccurred: function(errorMessage) {
+            console.log("QML: onErrorOccurred signal received:", errorMessage)
             root.addMessage("Error: " + errorMessage, false)
         }
     }

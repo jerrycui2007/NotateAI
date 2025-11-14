@@ -54,7 +54,10 @@ public:
         QString errorMessage;
     };
 
-    muse::async::Channel<GeminiResponse> sendMessage(const QString& userMessage);
+    void sendMessage(const QString& userMessage);
+
+signals:
+    void responseReceived(const GeminiService::GeminiResponse& response);
 
 private:
     void th_sendMessage(const QString& userMessage, std::function<void(GeminiResponse)> callback) const;
