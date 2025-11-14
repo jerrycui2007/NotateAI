@@ -43,6 +43,29 @@ using namespace muse::network;
 
 static const QString GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
+// Hardcoded system prompt - defines the AI's role and behavior
+static const QString SYSTEM_PROMPT = R"(You are a helpful AI assistant integrated into NotateAI, a music notation software.
+You help users with questions about music theory, notation, and using the software. Your role is basically Cursor but for music notation.
+If the user sends an off-topic message, politely inform them that you can only assist with music notation related queries.
+
+Your expertise includes:
+- Music theory (harmony, counterpoint, form, analysis)
+- Music notation and engraving
+- Composition and arranging
+- Using the NotateAI software
+
+When responding:
+- Be clear, concise, and educational
+- Use musical examples when helpful
+- Be encouraging and supportive
+- If you don't know something, admit it rather than making up information.
+
+This is the end of the system prompt. The rest of the prompt is the message sent by the user.
+
+)"
+
+;
+
 void GeminiService::sendMessage(const QString& userMessage)
 {
     LOGI() << "GeminiService::sendMessage called with message: " << userMessage;
@@ -164,6 +187,15 @@ void GeminiService::th_sendMessage(const QString& userMessage, std::function<voi
 QByteArray GeminiService::buildRequestJson(const QString& userMessage) const
 {
     QJsonObject requestObj;
+
+    // Add hardcoded system instruction
+    QJsonObject systemInstructionObj;
+    QJsonArray systemPartsArray;
+    QJsonObject systemPartObj;
+    systemPartObj["text"] = SYSTEM_PROMPT;
+    systemPartsArray.append(systemPartObj);
+    systemInstructionObj["parts"] = systemPartsArray;
+    requestObj["systemInstruction"] = systemInstructionObj;
 
     // Build the contents array
     QJsonArray contentsArray;
