@@ -200,7 +200,7 @@ void PreferencesModel::load(const QString& currentPageId)
                  "Preferences/BraillePreferencesPage.qml"),
 
         makeItem("notateai", QT_TRANSLATE_NOOP("appshell/preferences", "NotateAI"), IconCode::Code::STAR,
-                 "MuseScore/NotateAI/NotateAIPreferencesPage.qml")
+                 "Preferences/NotateAIPreferencesPage.qml")
     };
 
     for (PreferencePageItem* item: items) {

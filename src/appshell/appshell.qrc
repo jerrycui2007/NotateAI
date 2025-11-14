@@ -39,6 +39,7 @@
         <file>qml/Preferences/MidiDeviceMappingPreferencesPage.qml</file>
         <file>qml/Preferences/AudioMidiPreferencesPage.qml</file>
         <file>qml/Preferences/SaveAndPublishPreferencesPage.qml</file>
+        <file>qml/Preferences/NotateAIPreferencesPage.qml</file>
         <file>qml/Preferences/PreferencesDialog.qml</file>
         <file>qml/Preferences/internal/PreferencesButtonsPanel.qml</file>
         <file>qml/Preferences/internal/PreferencesMenu.qml</file>

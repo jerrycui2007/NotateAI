@@ -24,6 +24,7 @@
 
 #include <QString>
 #include <QJsonDocument>
+#include <QObject>
 
 #include "modularity/ioc.h"
 #include "network/inetworkmanagercreator.h"
@@ -32,15 +33,20 @@
 #include "types/ret.h"
 #include "types/retval.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
+
 namespace mu::notateai {
-class GeminiService : public muse::Injectable
+class GeminiService : public QObject, public muse::Injectable
 {
+    Q_OBJECT
+
     muse::Inject<muse::network::INetworkManagerCreator> networkManagerCreator = { this };
     muse::Inject<INotateAIConfiguration> configuration = { this };
 
 public:
     GeminiService(const muse::modularity::ContextPtr& iocCtx)
-        : Injectable(iocCtx) {}
+        : QObject(nullptr), Injectable(iocCtx) {}
 
     struct GeminiResponse {
         bool success = false;
@@ -52,6 +58,7 @@ public:
 
 private:
     void th_sendMessage(const QString& userMessage, std::function<void(GeminiResponse)> callback) const;
+    void th_sendMessageDirect(const QString& userMessage, std::function<void(GeminiResponse)> callback) const;
     QByteArray buildRequestJson(const QString& userMessage) const;
     GeminiResponse parseResponse(const QJsonDocument& responseDoc) const;
 };

@@ -26,6 +26,11 @@
 #include <QBuffer>
 #include <QUrl>
 #include <QUrlQuery>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
+#include <QTimer>
 
 #include "global/concurrency/concurrent.h"
 #include "log.h"
@@ -34,7 +39,7 @@ using namespace mu::notateai;
 using namespace muse;
 using namespace muse::network;
 
-static const QString GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+static const QString GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
 async::Channel<GeminiService::GeminiResponse> GeminiService::sendMessage(const QString& userMessage)
 {
@@ -45,7 +50,7 @@ async::Channel<GeminiService::GeminiResponse> GeminiService::sendMessage(const Q
         responseChannel.close();
     };
 
-    Concurrent::run(this, &GeminiService::th_sendMessage, userMessage, callback);
+    Concurrent::run(this, &GeminiService::th_sendMessageDirect, userMessage, callback);
 
     return responseChannel;
 }
@@ -100,6 +105,15 @@ void GeminiService::th_sendMessage(const QString& userMessage, std::function<voi
 
     if (!result) {
         LOGE() << "Network request failed: " << result.toString();
+        LOGE() << "Error code: " << result.code();
+        LOGE() << "Error text: " << result.text();
+
+        // Check if there's any response data even on error
+        QByteArray errorData = responseBuffer.data();
+        if (!errorData.isEmpty()) {
+            LOGE() << "Response data on error: " << errorData;
+        }
+
         response.success = false;
 
         // Provide user-friendly error messages
@@ -231,4 +245,163 @@ GeminiService::GeminiResponse GeminiService::parseResponse(const QJsonDocument& 
     response.responseText = text;
 
     return response;
+}
+
+void GeminiService::th_sendMessageDirect(const QString& userMessage, std::function<void(GeminiResponse)> callback) const
+{
+    TRACEFUNC;
+
+    GeminiResponse response;
+
+    // Check if API key is configured
+    QString apiKey = configuration()->geminiApiKey();
+    if (apiKey.isEmpty()) {
+        LOGE() << "Gemini API key is not configured";
+        response.success = false;
+        response.errorMessage = "API key not configured. Please add your Gemini API key in Preferences.";
+        callback(response);
+        return;
+    }
+
+    // Build the request URL with API key
+    QUrl requestUrl(GEMINI_API_ENDPOINT);
+    QUrlQuery query;
+    query.addQueryItem("key", apiKey);
+    requestUrl.setQuery(query);
+
+    // Build request JSON
+    QByteArray requestJson = buildRequestJson(userMessage);
+
+    LOGI() << "Sending request to Gemini API using direct QNetworkAccessManager...";
+    LOGD() << "Request URL: " << requestUrl.toString();
+    LOGD() << "Request JSON: " << requestJson;
+
+    // Create network request
+    QNetworkRequest request(requestUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
+
+    // Create network manager
+    QNetworkAccessManager* manager = new QNetworkAccessManager();
+
+    // Handle SSL errors - ignore them for now (for debugging)
+    QObject::connect(manager, &QNetworkAccessManager::sslErrors,
+                     [](QNetworkReply* reply, const QList<QSslError>& errors) {
+        LOGW() << "SSL errors occurred:";
+        for (const QSslError& error : errors) {
+            LOGW() << "  - " << error.errorString();
+        }
+        // Ignore SSL errors for Google's API
+        reply->ignoreSslErrors();
+    });
+
+    // Send POST request
+    QNetworkReply* reply = manager->post(request, requestJson);
+
+    // Also connect SSL errors directly to the reply
+    QObject::connect(reply, QOverload<const QList<QSslError>&>::of(&QNetworkReply::sslErrors),
+                     [](const QList<QSslError>& errors) {
+        LOGW() << "SSL errors on reply:";
+        for (const QSslError& error : errors) {
+            LOGW() << "  - " << error.errorString();
+        }
+    });
+
+    // Wait for reply
+    QEventLoop loop;
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+
+    bool isTimeout = false;
+    QObject::connect(&timeoutTimer, &QTimer::timeout, [&isTimeout, reply]() {
+        isTimeout = true;
+        reply->abort();
+    });
+
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+
+    timeoutTimer.start(60000); // 60 second timeout
+    loop.exec();
+
+    if (isTimeout) {
+        LOGE() << "Request timed out";
+        response.success = false;
+        response.errorMessage = "Request timed out. Please try again.";
+        reply->deleteLater();
+        manager->deleteLater();
+        callback(response);
+        return;
+    }
+
+    // Check for network errors
+    if (reply->error() != QNetworkReply::NoError) {
+        LOGE() << "Network error: " << reply->errorString();
+        LOGE() << "Error code: " << reply->error();
+
+        // Log HTTP status code
+        QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+        if (statusCode.isValid()) {
+            LOGE() << "HTTP status code: " << statusCode.toInt();
+        }
+
+        // Log response data even on error
+        QByteArray errorResponseData = reply->readAll();
+        if (!errorResponseData.isEmpty()) {
+            LOGE() << "Error response data: " << errorResponseData;
+        }
+
+        response.success = false;
+
+        // Provide user-friendly error messages
+        switch (reply->error()) {
+        case QNetworkReply::AuthenticationRequiredError:
+            response.errorMessage = "API authentication failed. Please check your API key in Preferences.";
+            break;
+        case QNetworkReply::ConnectionRefusedError:
+        case QNetworkReply::RemoteHostClosedError:
+        case QNetworkReply::HostNotFoundError:
+        case QNetworkReply::TimeoutError:
+        case QNetworkReply::NetworkSessionFailedError:
+            response.errorMessage = "Network error. Please check your internet connection.";
+            break;
+        default:
+            response.errorMessage = QString("Request failed: %1").arg(reply->errorString());
+            break;
+        }
+
+        reply->deleteLater();
+        manager->deleteLater();
+        callback(response);
+        return;
+    }
+
+    // Read response
+    QByteArray responseData = reply->readAll();
+    LOGD() << "Response received: " << responseData;
+
+    reply->deleteLater();
+    manager->deleteLater();
+
+    // Parse response
+    QJsonParseError parseError;
+    QJsonDocument responseDoc = QJsonDocument::fromJson(responseData, &parseError);
+
+    if (parseError.error != QJsonParseError::NoError) {
+        LOGE() << "Failed to parse JSON response: " << parseError.errorString();
+        response.success = false;
+        response.errorMessage = "Failed to parse API response.";
+        callback(response);
+        return;
+    }
+
+    // Parse the response
+    response = parseResponse(responseDoc);
+
+    if (response.success) {
+        LOGI() << "Successfully received AI response";
+    } else {
+        LOGW() << "API returned error: " << response.errorMessage;
+    }
+
+    callback(response);
 }
