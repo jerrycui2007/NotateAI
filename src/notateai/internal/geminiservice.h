@@ -32,6 +32,7 @@
 #include "async/channel.h"
 #include "types/ret.h"
 #include "types/retval.h"
+#include "context/iglobalcontext.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -43,6 +44,7 @@ class GeminiService : public QObject, public muse::Injectable
 
     muse::Inject<muse::network::INetworkManagerCreator> networkManagerCreator = { this };
     muse::Inject<INotateAIConfiguration> configuration = { this };
+    muse::Inject<mu::context::IGlobalContext> m_globalContext = { this };
 
 public:
     GeminiService(const muse::modularity::ContextPtr& iocCtx)
