@@ -62,6 +62,7 @@ signals:
     void responseReceived(const GeminiService::GeminiResponse& response);
 
 private:
+    QString extractScoreDataAsMusicXML() const;
     void th_sendMessage(const QString& userMessage, std::function<void(GeminiResponse)> callback) const;
     void th_sendMessageDirect(const QString& userMessage, std::function<void(GeminiResponse)> callback) const;
     QByteArray buildRequestJson(const QString& userMessage) const;

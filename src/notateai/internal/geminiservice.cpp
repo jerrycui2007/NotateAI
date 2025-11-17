@@ -36,6 +36,13 @@
 
 #include "global/concurrency/concurrent.h"
 #include "log.h"
+#include "context/iglobalcontext.h"
+#include "notation/inotation.h"
+#include "notation/inotationelements.h"
+#include "engraving/dom/score.h"
+#include "engraving/dom/masterscore.h"
+#include "importexport/musicxml/internal/musicxml/export/exportmusicxml.h"
+#include "io/buffer.h"
 
 using namespace mu::notateai;
 using namespace muse;
@@ -69,6 +76,13 @@ This is the end of the system prompt. The rest of the prompt is the message sent
 void GeminiService::sendMessage(const QString& userMessage)
 {
     LOGI() << "GeminiService::sendMessage called with message: " << userMessage;
+
+    // STEP 3 VERIFICATION: Test score data extraction
+    QString scoreData = extractScoreDataAsMusicXML();
+    LOGI() << "=== SCORE DATA EXTRACTION TEST ===";
+    LOGI() << "Score data length:" << scoreData.length();
+    LOGI() << "First 500 chars:" << scoreData.left(500);
+    LOGI() << "===================================";
 
     auto callback = [this](GeminiResponse response) {
         LOGI() << "Callback lambda invoked! Success: " << response.success;
@@ -182,6 +196,40 @@ void GeminiService::th_sendMessage(const QString& userMessage, std::function<voi
     }
 
     callback(response);
+}
+
+QString GeminiService::extractScoreDataAsMusicXML() const
+{
+    // Get current notation from global context (call Inject as a function)
+    notation::INotationPtr notation = m_globalContext()->currentNotation();
+
+    if (!notation) {
+        return QString("No score currently open");
+    }
+
+    // Get the underlying Score object
+    mu::engraving::Score* score = notation->elements()->msScore();
+
+    if (!score) {
+        return QString("Score data unavailable");
+    }
+
+    // Export to MusicXML format using muse::io::Buffer
+    muse::io::Buffer buffer;
+    buffer.open(muse::io::IODevice::OpenMode::WriteOnly);
+
+    // Use the MusicXML writer to export
+    bool success = mu::iex::musicxml::saveXml(score, &buffer);
+
+    if (!success) {
+        return QString("Error exporting score to MusicXML");
+    }
+
+    // Convert buffer to string
+    muse::ByteArray data = buffer.data();
+    QString musicXml = QString::fromUtf8(data.constChar(), data.size());
+
+    return musicXml;
 }
 
 QByteArray GeminiService::buildRequestJson(const QString& userMessage) const
