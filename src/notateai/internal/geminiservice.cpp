@@ -236,16 +236,34 @@ QByteArray GeminiService::buildRequestJson(const QString& userMessage) const
 {
     QJsonObject requestObj;
 
-    // Add hardcoded system instruction
+    // Extract current score data
+    QString scoreData = extractScoreDataAsMusicXML();
+
+    // Enhanced system prompt with score context
+    QString enhancedSystemPrompt = SYSTEM_PROMPT;
+
+    if (!scoreData.isEmpty() &&
+        scoreData != "No score currently open" &&
+        scoreData != "Score data unavailable" &&
+        !scoreData.startsWith("Error exporting score")) {
+        enhancedSystemPrompt += "\n\n## Current Score Context\n\n";
+        enhancedSystemPrompt += "The user is currently working on the following musical score (in MusicXML format):\n\n";
+        enhancedSystemPrompt += "```xml\n";
+        enhancedSystemPrompt += scoreData;
+        enhancedSystemPrompt += "\n```\n\n";
+        enhancedSystemPrompt += "Please use this score data to provide contextually relevant responses about the user's music.";
+    }
+
+    // System instruction with enhanced prompt
     QJsonObject systemInstructionObj;
     QJsonArray systemPartsArray;
     QJsonObject systemPartObj;
-    systemPartObj["text"] = SYSTEM_PROMPT;
+    systemPartObj["text"] = enhancedSystemPrompt;
     systemPartsArray.append(systemPartObj);
     systemInstructionObj["parts"] = systemPartsArray;
     requestObj["systemInstruction"] = systemInstructionObj;
 
-    // Build the contents array
+    // Build the contents array - user message contents (unchanged)
     QJsonArray contentsArray;
     QJsonObject contentObj;
 
@@ -260,7 +278,21 @@ QByteArray GeminiService::buildRequestJson(const QString& userMessage) const
     requestObj["contents"] = contentsArray;
 
     QJsonDocument doc(requestObj);
-    return doc.toJson(QJsonDocument::Compact);
+    QByteArray jsonData = doc.toJson(QJsonDocument::Compact);
+
+    // STEP 4 VERIFICATION: Log request details including XML data
+    LOGI() << "=== REQUEST JSON TEST ===";
+    LOGI() << "Total request size:" << jsonData.size() << "bytes";
+    LOGI() << "Contains MusicXML:" << jsonData.contains("MusicXML");
+    LOGI() << "Contains score-partwise:" << jsonData.contains("score-partwise");
+    LOGI() << "Score data length:" << scoreData.length() << "characters";
+    if (!scoreData.isEmpty() && scoreData != "No score currently open" && scoreData != "Score data unavailable") {
+        LOGI() << "MusicXML first 500 chars:" << scoreData.left(500);
+        LOGI() << "MusicXML last 500 chars:" << scoreData.right(500);
+    }
+    LOGI() << "=========================";
+
+    return jsonData;
 }
 
 GeminiService::GeminiResponse GeminiService::parseResponse(const QJsonDocument& responseDoc) const
