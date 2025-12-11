@@ -40,7 +40,8 @@
       "Bash(if not exist \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\qml\" mkdir \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\qml\")",
       "Bash(New-Item -ItemType Directory -Force -Path \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\qml\")",
       "Bash(C:/Qt/Tools/mingw1310_64/bin/mingw32-make.exe:*)",
-      "Bash(/c/Qt/Tools/mingw1310_64/bin/mingw32-make.exe:*)"
+      "Bash(/c/Qt/Tools/mingw1310_64/bin/mingw32-make.exe:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

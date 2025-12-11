@@ -35,6 +35,7 @@ class NotateAIPanelModel : public QObject, public muse::Injectable, public muse:
     Q_OBJECT
 
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(bool resendScoreData READ resendScoreData WRITE setResendScoreData NOTIFY resendScoreDataChanged)
 
     muse::Inject<INotateAIConfiguration> configuration = { this };
 
@@ -42,19 +43,24 @@ public:
     explicit NotateAIPanelModel(QObject* parent = nullptr);
 
     bool isLoading() const;
+    bool resendScoreData() const;
+    void setResendScoreData(bool resend);
 
     Q_INVOKABLE void sendMessage(const QString& message);
+    Q_INVOKABLE void clearConversation();
 
 signals:
     void messageReceived(QString aiResponse);
     void errorOccurred(QString errorMessage);
     void isLoadingChanged();
+    void resendScoreDataChanged();
 
 private:
     void handleGeminiResponse(const GeminiService::GeminiResponse& response);
 
     GeminiService* m_geminiService = nullptr;
     bool m_isLoading = false;
+    bool m_resendScoreData = false;
 };
 }
 

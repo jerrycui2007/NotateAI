@@ -146,64 +146,105 @@ Item {
             Rectangle {
                 id: inputArea
                 width: parent.width
-                height: Math.min(200, Math.max(60, textArea.contentHeight + 48))
+                height: Math.min(200, Math.max(100, textArea.contentHeight + 88))
                 color: ui.theme.backgroundSecondaryColor
 
-                Row {
+                Column {
                     anchors.fill: parent
                     anchors.margins: 8
                     spacing: 8
-                    anchors.bottomMargin: 8
 
-                    // Text input field
-                    Rectangle {
-                        width: parent.width - sendButton.width - parent.spacing
-                        height: parent.height
-                        color: ui.theme.textFieldColor
-                        border.color: ui.theme.strokeColor
-                        border.width: 1
-                        radius: 4
+                    // Controls row (checkbox and clear button)
+                    Row {
+                        width: parent.width
+                        spacing: 8
 
-                        ScrollView {
-                            anchors.fill: parent
-                            anchors.margins: 8
-                            clip: true
+                        CheckBox {
+                            id: resendScoreCheckbox
+                            text: qsTrc("appshell", "Include score data")
+                            checked: panelModel.resendScoreData
 
-                            TextArea {
-                                id: textArea
-                                width: parent.width
-                                wrapMode: TextArea.Wrap
-                                font: ui.theme.bodyFont
-                                color: ui.theme.fontPrimaryColor
-                                background: null
-                                selectByMouse: true
+                            onClicked: {
+                                panelModel.resendScoreData = !panelModel.resendScoreData
+                            }
+                        }
 
-                                placeholderText: qsTrc("appshell", "Type a message...")
-                                placeholderTextColor: ui.theme.fontSecondaryColor
+                        Item {
+                            // Spacer
+                            width: parent.width - resendScoreCheckbox.width - clearButton.width - parent.spacing * 2
+                            height: 1
+                        }
+
+                        FlatButton {
+                            id: clearButton
+                            width: 80
+                            height: 28
+                            text: qsTrc("appshell", "Clear")
+                            enabled: !panelModel.isLoading
+
+                            onClicked: {
+                                chatMessagesModel.clear()
+                                panelModel.clearConversation()
                             }
                         }
                     }
 
-                    // Send button (up arrow)
-                    FlatButton {
-                        id: sendButton
-                        width: 44
-                        height: 44
-                        anchors.bottom: parent.bottom
-                        icon: IconCode.ARROW_UP
-                        enabled: !panelModel.isLoading && textArea.text.trim().length > 0
+                    // Text input row
+                    Row {
+                        width: parent.width
+                        height: parent.height - 36  // Account for controls row
+                        spacing: 8
 
-                        onClicked: {
-                            var message = textArea.text.trim()
-                            if (message.length > 0) {
-                                // Add user message
-                                root.addMessage(message, true)
+                        // Text input field
+                        Rectangle {
+                            width: parent.width - sendButton.width - parent.spacing
+                            height: parent.height
+                            color: ui.theme.textFieldColor
+                            border.color: ui.theme.strokeColor
+                            border.width: 1
+                            radius: 4
 
-                                // Clear text box
-                                textArea.text = ""
+                            ScrollView {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                clip: true
 
-                                // Send message to backend
-                                panelModel.sendMessage(message)
+                                TextArea {
+                                    id: textArea
+                                    width: parent.width
+                                    wrapMode: TextArea.Wrap
+                                    font: ui.theme.bodyFont
+                                    color: ui.theme.fontPrimaryColor
+                                    background: null
+                                    selectByMouse: true
+
+                                    placeholderText: qsTrc("appshell", "Type a message...")
+                                    placeholderTextColor: ui.theme.fontSecondaryColor
+                                }
+                            }
+                        }
+
+                        // Send button (up arrow)
+                        FlatButton {
+                            id: sendButton
+                            width: 44
+                            height: 44
+                            anchors.bottom: parent.bottom
+                            icon: IconCode.ARROW_UP
+                            enabled: !panelModel.isLoading && textArea.text.trim().length > 0
+
+                            onClicked: {
+                                var message = textArea.text.trim()
+                                if (message.length > 0) {
+                                    // Add user message
+                                    root.addMessage(message, true)
+
+                                    // Clear text box
+                                    textArea.text = ""
+
+                                    // Send message to backend
+                                    panelModel.sendMessage(message)
+                                }
                             }
                         }
                     }

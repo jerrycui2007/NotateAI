@@ -73,20 +73,44 @@ This is the end of the system prompt. The rest of the prompt is the message sent
 
 ;
 
-void GeminiService::sendMessage(const QString& userMessage)
+void GeminiService::sendMessage(const QString& userMessage, bool includeScoreData)
 {
     LOGI() << "GeminiService::sendMessage called with message: " << userMessage;
+    LOGI() << "Include score data: " << includeScoreData;
 
-    // STEP 3 VERIFICATION: Test score data extraction
-    QString scoreData = extractScoreDataAsMusicXML();
-    LOGI() << "=== SCORE DATA EXTRACTION TEST ===";
-    LOGI() << "Score data length:" << scoreData.length();
-    LOGI() << "First 500 chars:" << scoreData.left(500);
-    LOGI() << "===================================";
+    // Store user message to add to history after successful response
+    m_pendingUserMessage = userMessage;
+
+    if (includeScoreData) {
+        // STEP 3 VERIFICATION: Test score data extraction
+        QString scoreData = extractScoreDataAsMusicXML();
+        LOGI() << "=== SCORE DATA EXTRACTION TEST ===";
+        LOGI() << "Score data length:" << scoreData.length();
+        LOGI() << "First 500 chars:" << scoreData.left(500);
+        LOGI() << "===================================";
+    }
 
     auto callback = [this](GeminiResponse response) {
         LOGI() << "Callback lambda invoked! Success: " << response.success;
         LOGI() << "Callback: About to emit responseReceived signal";
+
+        // Add to conversation history if successful
+        if (response.success && !m_pendingUserMessage.isEmpty()) {
+            // Add user message
+            ConversationTurn userTurn;
+            userTurn.role = "user";
+            userTurn.text = m_pendingUserMessage;
+            m_conversationHistory.append(userTurn);
+
+            // Add AI response
+            ConversationTurn modelTurn;
+            modelTurn.role = "model";
+            modelTurn.text = response.responseText;
+            m_conversationHistory.append(modelTurn);
+
+            LOGI() << "Conversation history updated, now has" << m_conversationHistory.size() << "turns";
+            m_pendingUserMessage.clear();
+        }
 
         // Emit the signal - Qt will handle cross-thread communication automatically
         emit responseReceived(response);
@@ -95,11 +119,21 @@ void GeminiService::sendMessage(const QString& userMessage)
     };
 
     LOGI() << "Starting concurrent task...";
-    Concurrent::run(this, &GeminiService::th_sendMessageDirect, userMessage, callback);
+    // Use lambda to capture all parameters since Concurrent::run only supports up to 2 params
+    Concurrent::run([this, userMessage, includeScoreData, callback]() {
+        th_sendMessageDirect(userMessage, includeScoreData, callback);
+    });
     LOGI() << "Concurrent task started";
 }
 
-void GeminiService::th_sendMessage(const QString& userMessage, std::function<void(GeminiResponse)> callback) const
+void GeminiService::clearHistory()
+{
+    m_conversationHistory.clear();
+    m_pendingUserMessage.clear();
+    LOGI() << "Conversation history cleared";
+}
+
+void GeminiService::th_sendMessage(const QString& userMessage, bool includeScoreData, std::function<void(GeminiResponse)> callback)
 {
     TRACEFUNC;
 
@@ -125,7 +159,7 @@ void GeminiService::th_sendMessage(const QString& userMessage, std::function<voi
     INetworkManagerPtr networkManager = networkManagerCreator()->makeNetworkManager();
 
     // Build request JSON
-    QByteArray requestJson = buildRequestJson(userMessage);
+    QByteArray requestJson = buildRequestJson(userMessage, includeScoreData);
 
     // Setup request headers
     RequestHeaders headers;
@@ -232,26 +266,34 @@ QString GeminiService::extractScoreDataAsMusicXML() const
     return musicXml;
 }
 
-QByteArray GeminiService::buildRequestJson(const QString& userMessage) const
+QByteArray GeminiService::buildRequestJson(const QString& userMessage, bool includeScoreData) const
 {
     QJsonObject requestObj;
 
-    // Extract current score data
-    QString scoreData = extractScoreDataAsMusicXML();
-
-    // Enhanced system prompt with score context
+    // Enhanced system prompt with optional score context
     QString enhancedSystemPrompt = SYSTEM_PROMPT;
 
-    if (!scoreData.isEmpty() &&
-        scoreData != "No score currently open" &&
-        scoreData != "Score data unavailable" &&
-        !scoreData.startsWith("Error exporting score")) {
-        enhancedSystemPrompt += "\n\n## Current Score Context\n\n";
-        enhancedSystemPrompt += "The user is currently working on the following musical score (in MusicXML format):\n\n";
-        enhancedSystemPrompt += "```xml\n";
-        enhancedSystemPrompt += scoreData;
-        enhancedSystemPrompt += "\n```\n\n";
-        enhancedSystemPrompt += "Please use this score data to provide contextually relevant responses about the user's music.";
+    if (includeScoreData) {
+        // Extract current score data only if requested
+        QString scoreData = extractScoreDataAsMusicXML();
+
+        if (!scoreData.isEmpty() &&
+            scoreData != "No score currently open" &&
+            scoreData != "Score data unavailable" &&
+            !scoreData.startsWith("Error exporting score")) {
+            enhancedSystemPrompt += "\n\n## Current Score Context\n\n";
+            enhancedSystemPrompt += "The user is currently working on the following musical score (in MusicXML format):\n\n";
+            enhancedSystemPrompt += "```xml\n";
+            enhancedSystemPrompt += scoreData;
+            enhancedSystemPrompt += "\n```\n\n";
+            enhancedSystemPrompt += "Please use this score data to provide contextually relevant responses about the user's music.";
+
+            LOGI() << "=== SCORE DATA INCLUDED ===";
+            LOGI() << "Score data length:" << scoreData.length() << "characters";
+            LOGI() << "===========================";
+        }
+    } else {
+        LOGI() << "Score data NOT included in this request";
     }
 
     // System instruction with enhanced prompt
@@ -263,33 +305,45 @@ QByteArray GeminiService::buildRequestJson(const QString& userMessage) const
     systemInstructionObj["parts"] = systemPartsArray;
     requestObj["systemInstruction"] = systemInstructionObj;
 
-    // Build the contents array - user message contents (unchanged)
+    // Build the contents array with conversation history
     QJsonArray contentsArray;
-    QJsonObject contentObj;
 
-    QJsonArray partsArray;
-    QJsonObject partObj;
-    partObj["text"] = userMessage;
-    partsArray.append(partObj);
+    // Add previous conversation turns
+    for (const ConversationTurn& turn : m_conversationHistory) {
+        QJsonObject turnObj;
+        turnObj["role"] = turn.role;
 
-    contentObj["parts"] = partsArray;
-    contentsArray.append(contentObj);
+        QJsonArray partsArray;
+        QJsonObject partObj;
+        partObj["text"] = turn.text;
+        partsArray.append(partObj);
+
+        turnObj["parts"] = partsArray;
+        contentsArray.append(turnObj);
+    }
+
+    // Add current user message
+    QJsonObject currentMessageObj;
+    currentMessageObj["role"] = "user";
+
+    QJsonArray currentPartsArray;
+    QJsonObject currentPartObj;
+    currentPartObj["text"] = userMessage;
+    currentPartsArray.append(currentPartObj);
+
+    currentMessageObj["parts"] = currentPartsArray;
+    contentsArray.append(currentMessageObj);
 
     requestObj["contents"] = contentsArray;
 
     QJsonDocument doc(requestObj);
     QByteArray jsonData = doc.toJson(QJsonDocument::Compact);
 
-    // STEP 4 VERIFICATION: Log request details including XML data
+    // Log request details
     LOGI() << "=== REQUEST JSON TEST ===";
     LOGI() << "Total request size:" << jsonData.size() << "bytes";
-    LOGI() << "Contains MusicXML:" << jsonData.contains("MusicXML");
-    LOGI() << "Contains score-partwise:" << jsonData.contains("score-partwise");
-    LOGI() << "Score data length:" << scoreData.length() << "characters";
-    if (!scoreData.isEmpty() && scoreData != "No score currently open" && scoreData != "Score data unavailable") {
-        LOGI() << "MusicXML first 500 chars:" << scoreData.left(500);
-        LOGI() << "MusicXML last 500 chars:" << scoreData.right(500);
-    }
+    LOGI() << "Conversation history turns:" << m_conversationHistory.size();
+    LOGI() << "Include score data:" << includeScoreData;
     LOGI() << "=========================";
 
     return jsonData;
@@ -366,7 +420,7 @@ GeminiService::GeminiResponse GeminiService::parseResponse(const QJsonDocument& 
     return response;
 }
 
-void GeminiService::th_sendMessageDirect(const QString& userMessage, std::function<void(GeminiResponse)> callback) const
+void GeminiService::th_sendMessageDirect(const QString& userMessage, bool includeScoreData, std::function<void(GeminiResponse)> callback)
 {
     TRACEFUNC;
 
@@ -389,7 +443,7 @@ void GeminiService::th_sendMessageDirect(const QString& userMessage, std::functi
     requestUrl.setQuery(query);
 
     // Build request JSON
-    QByteArray requestJson = buildRequestJson(userMessage);
+    QByteArray requestJson = buildRequestJson(userMessage, includeScoreData);
 
     LOGI() << "Sending request to Gemini API using direct QNetworkAccessManager...";
     LOGD() << "Request URL: " << requestUrl.toString();

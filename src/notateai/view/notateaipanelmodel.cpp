@@ -48,10 +48,30 @@ bool NotateAIPanelModel::isLoading() const
     return m_isLoading;
 }
 
+bool NotateAIPanelModel::resendScoreData() const
+{
+    return m_resendScoreData;
+}
+
+void NotateAIPanelModel::setResendScoreData(bool resend)
+{
+    if (m_resendScoreData != resend) {
+        m_resendScoreData = resend;
+        emit resendScoreDataChanged();
+    }
+}
+
+void NotateAIPanelModel::clearConversation()
+{
+    m_geminiService->clearHistory();
+    LOGI() << "Conversation cleared from panel model";
+}
+
 void NotateAIPanelModel::sendMessage(const QString& message)
 {
     LOGI() << "========================================";
     LOGI() << "NotateAIPanelModel::sendMessage called with message: " << message;
+    LOGI() << "Resend score data toggle: " << m_resendScoreData;
 
     if (m_isLoading) {
         LOGW() << "Already loading, ignoring new request";
@@ -71,9 +91,16 @@ void NotateAIPanelModel::sendMessage(const QString& message)
 
     LOGI() << "Sending message to Gemini service (via Qt signal/slot)...";
 
-    // Send message to Gemini service
+    // Send message to Gemini service with score data toggle
     // The response will be received via the responseReceived signal connection
-    m_geminiService->sendMessage(message);
+    bool includeScore = m_resendScoreData;
+    m_geminiService->sendMessage(message, includeScore);
+
+    // Reset the toggle after sending
+    if (m_resendScoreData) {
+        m_resendScoreData = false;
+        emit resendScoreDataChanged();
+    }
 
     LOGI() << "Message sent to GeminiService";
     LOGI() << "========================================";

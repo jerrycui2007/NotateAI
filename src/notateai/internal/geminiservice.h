@@ -25,6 +25,7 @@
 #include <QString>
 #include <QJsonDocument>
 #include <QObject>
+#include <QList>
 
 #include "modularity/ioc.h"
 #include "network/inetworkmanagercreator.h"
@@ -38,6 +39,12 @@ class QNetworkAccessManager;
 class QNetworkReply;
 
 namespace mu::notateai {
+
+struct ConversationTurn {
+    QString role;  // "user" or "model"
+    QString text;
+};
+
 class GeminiService : public QObject, public muse::Injectable
 {
     Q_OBJECT
@@ -56,17 +63,21 @@ public:
         QString errorMessage;
     };
 
-    void sendMessage(const QString& userMessage);
+    void sendMessage(const QString& userMessage, bool includeScoreData = false);
+    void clearHistory();
 
 signals:
     void responseReceived(const GeminiService::GeminiResponse& response);
 
 private:
     QString extractScoreDataAsMusicXML() const;
-    void th_sendMessage(const QString& userMessage, std::function<void(GeminiResponse)> callback) const;
-    void th_sendMessageDirect(const QString& userMessage, std::function<void(GeminiResponse)> callback) const;
-    QByteArray buildRequestJson(const QString& userMessage) const;
+    void th_sendMessage(const QString& userMessage, bool includeScoreData, std::function<void(GeminiResponse)> callback);
+    void th_sendMessageDirect(const QString& userMessage, bool includeScoreData, std::function<void(GeminiResponse)> callback);
+    QByteArray buildRequestJson(const QString& userMessage, bool includeScoreData) const;
     GeminiResponse parseResponse(const QJsonDocument& responseDoc) const;
+
+    QList<ConversationTurn> m_conversationHistory;
+    QString m_pendingUserMessage;  // Store user message to add to history after response
 };
 }
 
