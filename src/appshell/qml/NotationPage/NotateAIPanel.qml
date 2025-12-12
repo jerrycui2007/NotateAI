@@ -96,7 +96,7 @@ Item {
                             color: model.isUserMessage ? ui.theme.backgroundSecondaryColor : "transparent"
                             radius: 8
 
-                            Text {
+                            StyledTextLabel {
                                 id: messageTextItem
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -105,7 +105,8 @@ Item {
                                 text: model.messageText
                                 wrapMode: Text.Wrap
                                 font: ui.theme.bodyFont
-                                color: ui.theme.fontPrimaryColor
+                                horizontalAlignment: Text.AlignLeft
+                                textFormat: model.isUserMessage ? Text.PlainText : Text.MarkdownText
                             }
                         }
 
