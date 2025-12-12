@@ -50,27 +50,114 @@ using namespace muse::network;
 
 static const QString GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
-// Hardcoded system prompt - defines the AI's role and behavior
-static const QString SYSTEM_PROMPT = R"(You are a helpful AI assistant integrated into NotateAI, a music notation software.
-You help users with questions about music theory, notation, and using the software. Your role is basically Cursor but for music notation.
+// Base system prompt - defines the AI's role and behavior (sent every message)
+static const QString BASE_SYSTEM_PROMPT = R"(You are a helpful AI assistant integrated into NotateAI, a music notation software based on MuseScore 4.
+You help users with questions about music theory, notation, and using the software. Your role is like an AI coding assistant but for music notation.
 If the user sends an off-topic message, politely inform them that you can only assist with music notation related queries.
 
 Your expertise includes:
 - Music theory (harmony, counterpoint, form, analysis)
 - Music notation and engraving
 - Composition and arranging
-- Using the NotateAI software
+- Using the NotateAI software and its API
 
 When responding:
 - Be clear, concise, and educational
 - Use musical examples when helpful
 - Be encouraging and supportive
-- If you don't know something, admit it rather than making up information.
-
-This is the end of the system prompt. The rest of the prompt is the message sent by the user.
-
+- If you don't know something, admit it rather than making up information
 )"
+;
 
+// API documentation - sent only on first message of conversation
+static const QString API_DOCUMENTATION = R"(
+## MuseScore 4 API Reference
+
+You can generate commands to modify the user's score. When the user asks you to make changes to their score, you should respond with the appropriate API calls.
+
+### Adding Notes via Cursor
+
+```javascript
+var cursor = curScore.newCursor();
+cursor.rewind(Cursor.SCORE_START);  // Navigate to start
+cursor.setDuration(1, 4);           // Set quarter note duration
+curScore.startCmd("Add Notes");
+cursor.addNote(60);                 // Add Middle C (MIDI pitch)
+cursor.addNote(62);                 // Add D
+curScore.endCmd();
+```
+
+### Duration Values (setDuration(z, n) = z/n fraction)
+- Whole: (1,1), Half: (1,2), Quarter: (1,4), Eighth: (1,8), 16th: (1,16)
+- Dotted quarter: (3,8), Dotted half: (3,4), Dotted eighth: (3,16)
+
+### MIDI Pitch Reference
+| Note | Oct 3 | Oct 4 | Oct 5 |
+|------|-------|-------|-------|
+| C    | 48    | 60    | 72    |
+| D    | 50    | 62    | 74    |
+| E    | 52    | 64    | 76    |
+| F    | 53    | 65    | 77    |
+| G    | 55    | 67    | 79    |
+| A    | 57    | 69    | 81    |
+| B    | 59    | 71    | 83    |
+
+Middle C (C4) = 60, Concert A (A4) = 69
+
+### Building Chords
+```javascript
+cursor.addNote(60, false);  // C (new chord)
+cursor.addNote(64, true);   // Add E to chord
+cursor.addNote(67, true);   // Add G to chord (C major)
+```
+
+### Common Actions via cmd()
+```javascript
+cmd("note-input");           // Toggle note input mode
+cmd("note-c");               // Enter C
+cmd("rest");                 // Enter rest
+cmd("pitch-up");             // Pitch up semitone
+cmd("pitch-down");           // Pitch down semitone
+cmd("pitch-up-octave");      // Up octave
+cmd("pitch-down-octave");    // Down octave
+cmd("tie");                  // Add tie
+cmd("add-slur");             // Add slur
+cmd("triplet");              // Enter triplet
+cmd("pad-dot");              // Toggle dot
+cmd("flat");                 // Add flat
+cmd("sharp");                // Add sharp
+cmd("natural");              // Add natural
+```
+
+### Navigation
+```javascript
+cursor.next();               // Next segment
+cursor.nextMeasure();        // Next measure
+cursor.rewind(Cursor.SCORE_START);      // Go to start
+cursor.rewind(Cursor.SELECTION_START);  // Go to selection start
+```
+
+### Adding Elements
+```javascript
+var text = newElement(Element.STAFF_TEXT);
+text.text = "pizz.";
+cursor.add(text);
+```
+
+### Score Operations
+```javascript
+curScore.appendMeasures(4);  // Add 4 measures
+curScore.startCmd("Action Name");  // Start undo block
+curScore.endCmd();                  // End undo block
+```
+
+### Cursor Properties
+- `cursor.track` - Current track (staffIdx * 4 + voice)
+- `cursor.staffIdx` - Staff number
+- `cursor.voice` - Voice (0-3)
+- `cursor.element` - Element at cursor
+- `cursor.measure` - Current measure
+)"
 ;
 
 void GeminiService::sendMessage(const QString& userMessage, bool includeScoreData)
@@ -270,8 +357,17 @@ QByteArray GeminiService::buildRequestJson(const QString& userMessage, bool incl
 {
     QJsonObject requestObj;
 
-    // Enhanced system prompt with optional score context
-    QString enhancedSystemPrompt = SYSTEM_PROMPT;
+    // Build system prompt - include API docs only on first message (empty conversation history)
+    bool isFirstMessage = m_conversationHistory.isEmpty();
+    QString systemPrompt = BASE_SYSTEM_PROMPT;
+
+    if (isFirstMessage) {
+        // Include full API documentation on first message
+        systemPrompt += API_DOCUMENTATION;
+        LOGI() << "=== FIRST MESSAGE - Including API documentation ===";
+    } else {
+        LOGI() << "=== SUBSEQUENT MESSAGE - API docs already in context ===";
+    }
 
     if (includeScoreData) {
         // Extract current score data only if requested
@@ -281,12 +377,12 @@ QByteArray GeminiService::buildRequestJson(const QString& userMessage, bool incl
             scoreData != "No score currently open" &&
             scoreData != "Score data unavailable" &&
             !scoreData.startsWith("Error exporting score")) {
-            enhancedSystemPrompt += "\n\n## Current Score Context\n\n";
-            enhancedSystemPrompt += "The user is currently working on the following musical score (in MusicXML format):\n\n";
-            enhancedSystemPrompt += "```xml\n";
-            enhancedSystemPrompt += scoreData;
-            enhancedSystemPrompt += "\n```\n\n";
-            enhancedSystemPrompt += "Please use this score data to provide contextually relevant responses about the user's music.";
+            systemPrompt += "\n\n## Current Score Context\n\n";
+            systemPrompt += "The user is currently working on the following musical score (in MusicXML format):\n\n";
+            systemPrompt += "```xml\n";
+            systemPrompt += scoreData;
+            systemPrompt += "\n```\n\n";
+            systemPrompt += "Please use this score data to provide contextually relevant responses about the user's music.";
 
             LOGI() << "=== SCORE DATA INCLUDED ===";
             LOGI() << "Score data length:" << scoreData.length() << "characters";
@@ -296,11 +392,11 @@ QByteArray GeminiService::buildRequestJson(const QString& userMessage, bool incl
         LOGI() << "Score data NOT included in this request";
     }
 
-    // System instruction with enhanced prompt
+    // System instruction
     QJsonObject systemInstructionObj;
     QJsonArray systemPartsArray;
     QJsonObject systemPartObj;
-    systemPartObj["text"] = enhancedSystemPrompt;
+    systemPartObj["text"] = systemPrompt;
     systemPartsArray.append(systemPartObj);
     systemInstructionObj["parts"] = systemPartsArray;
     requestObj["systemInstruction"] = systemInstructionObj;
@@ -340,11 +436,12 @@ QByteArray GeminiService::buildRequestJson(const QString& userMessage, bool incl
     QByteArray jsonData = doc.toJson(QJsonDocument::Compact);
 
     // Log request details
-    LOGI() << "=== REQUEST JSON TEST ===";
+    LOGI() << "=== REQUEST JSON DETAILS ===";
+    LOGI() << "First message (includes API docs):" << isFirstMessage;
     LOGI() << "Total request size:" << jsonData.size() << "bytes";
     LOGI() << "Conversation history turns:" << m_conversationHistory.size();
     LOGI() << "Include score data:" << includeScoreData;
-    LOGI() << "=========================";
+    LOGI() << "=============================";
 
     return jsonData;
 }
