@@ -33,6 +33,7 @@ NotateAIPanelModel::NotateAIPanelModel(QObject* parent)
     : QObject(parent), muse::Injectable(muse::iocCtxForQmlObject(this))
 {
     m_geminiService = new GeminiService(iocContext());
+    m_commandExecutor = new CommandExecutor(iocContext(), this);
 
     // Connect to the GeminiService's responseReceived signal
     // Qt::QueuedConnection ensures the slot is called on this object's thread (main thread)
@@ -61,10 +62,65 @@ void NotateAIPanelModel::setResendScoreData(bool resend)
     }
 }
 
+bool NotateAIPanelModel::hasCommands() const
+{
+    return !m_pendingCommands.isEmpty();
+}
+
+bool NotateAIPanelModel::isExecuting() const
+{
+    return m_isExecuting;
+}
+
 void NotateAIPanelModel::clearConversation()
 {
     m_geminiService->clearHistory();
+    m_pendingCommands.clear();
+    emit hasCommandsChanged();
     LOGI() << "Conversation cleared from panel model";
+}
+
+void NotateAIPanelModel::executeCommands()
+{
+    if (m_pendingCommands.isEmpty()) {
+        LOGW() << "executeCommands called but no commands pending";
+        return;
+    }
+
+    if (m_isExecuting) {
+        LOGW() << "Already executing commands, ignoring request";
+        return;
+    }
+
+    m_isExecuting = true;
+    emit isExecutingChanged();
+
+    LOGI() << "Executing" << m_pendingCommands.size() << "command(s)";
+
+    bool allSucceeded = true;
+    QString lastError;
+
+    for (const ParsedCommand& cmd : m_pendingCommands) {
+        LOGI() << "Executing command block...";
+        ExecutionResult result = m_commandExecutor->execute(cmd.code);
+
+        if (!result.success) {
+            allSucceeded = false;
+            lastError = result.errorMessage;
+            LOGW() << "Command execution failed:" << lastError;
+            break;
+        }
+    }
+
+    m_isExecuting = false;
+    emit isExecutingChanged();
+
+    // Clear pending commands after execution attempt
+    m_pendingCommands.clear();
+    emit hasCommandsChanged();
+
+    // Emit result signal
+    emit commandExecuted(allSucceeded, allSucceeded ? "Commands executed successfully" : lastError);
 }
 
 void NotateAIPanelModel::sendMessage(const QString& message)
@@ -119,6 +175,14 @@ void NotateAIPanelModel::handleGeminiResponse(const GeminiService::GeminiRespons
 
     if (response.success) {
         LOGI() << "Successfully received AI response, emitting to QML: " << response.responseText;
+
+        // Parse the response for executable commands
+        m_pendingCommands = CommandParser::extractCommands(response.responseText);
+        if (!m_pendingCommands.isEmpty()) {
+            LOGI() << "Found" << m_pendingCommands.size() << "executable command(s) in response";
+            emit hasCommandsChanged();
+        }
+
         emit messageReceived(response.responseText);
         LOGI() << "messageReceived signal emitted to QML";
     } else {

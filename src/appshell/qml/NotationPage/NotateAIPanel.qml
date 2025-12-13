@@ -48,6 +48,15 @@ Item {
             console.log("QML: onErrorOccurred signal received:", errorMessage)
             root.addMessage("Error: " + errorMessage, false)
         }
+
+        onCommandExecuted: function(success, message) {
+            console.log("QML: onCommandExecuted signal received, success:", success, "message:", message)
+            if (success) {
+                root.addMessage("✓ " + message, false)
+            } else {
+                root.addMessage("✗ Execution error: " + message, false)
+            }
+        }
     }
 
     // Chat message model
@@ -155,7 +164,7 @@ Item {
                     anchors.margins: 8
                     spacing: 8
 
-                    // Controls row (checkbox and clear button)
+                    // Controls row (checkbox, execute button, and clear button)
                     Row {
                         width: parent.width
                         spacing: 8
@@ -171,9 +180,27 @@ Item {
                         }
 
                         Item {
-                            // Spacer
-                            width: parent.width - resendScoreCheckbox.width - clearButton.width - parent.spacing * 2
+                            // Spacer - only account for executeButton width when it's visible
+                            width: {
+                                var executeWidth = executeButton.visible ? executeButton.width + parent.spacing : 0
+                                return parent.width - resendScoreCheckbox.width - executeWidth - clearButton.width - parent.spacing * 2
+                            }
                             height: 1
+                        }
+
+                        FlatButton {
+                            id: executeButton
+                            width: 100
+                            height: 28
+                            text: panelModel.isExecuting ? qsTrc("appshell", "Running...") : qsTrc("appshell", "Execute")
+                            visible: panelModel.hasCommands || panelModel.isExecuting
+                            enabled: panelModel.hasCommands && !panelModel.isExecuting
+                            accentButton: true
+
+                            onClicked: {
+                                console.log("QML: Execute button clicked")
+                                panelModel.executeCommands()
+                            }
                         }
 
                         FlatButton {

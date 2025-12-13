@@ -32,6 +32,10 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/internal/notateaiconfiguration.h
     ${CMAKE_CURRENT_LIST_DIR}/internal/geminiservice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/internal/geminiservice.h
+    ${CMAKE_CURRENT_LIST_DIR}/internal/commandparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/internal/commandparser.h
+    ${CMAKE_CURRENT_LIST_DIR}/internal/commandexecutor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/internal/commandexecutor.h
     ${CMAKE_CURRENT_LIST_DIR}/view/notateaipanelmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/view/notateaipanelmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/view/notateaipreferencesmodel.cpp
@@ -41,6 +45,7 @@ set(MODULE_SRC
 set(MODULE_LINK
     muse::uicomponents
     muse::network
+    muse::extensions
     Qt::Quick
     Qt::Concurrent
     )

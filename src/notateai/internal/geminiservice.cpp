@@ -73,90 +73,183 @@ When responding:
 static const QString API_DOCUMENTATION = R"(
 ## MuseScore 4 API Reference
 
-You can generate commands to modify the user's score. When the user asks you to make changes to their score, you should respond with the appropriate API calls.
+You can generate commands to modify the user's score. When the user asks you to make changes, you MUST provide REAL EXECUTABLE JAVASCRIPT CODE in a ```notateai code block.
 
-### Adding Notes via Cursor
+CRITICAL RULES:
+1. Use ```notateai (not ```javascript) - this triggers the Execute button
+2. Write ACTUAL JavaScript code, NOT shorthand or pseudocode
+3. Use MIDI pitch numbers (60 = Middle C, 62 = D, 64 = E, etc.)
+4. Always wrap modifications in curScore.startCmd()/endCmd() for undo support
+5. DO NOT invent methods - ONLY use the methods documented below
+6. There is NO goToMeasure() or goTo() method - use rewind() and nextMeasure()
 
-```javascript
+### MIDI Pitch Values (MUST use these numbers, not note names)
+C3=48, D3=50, E3=52, F3=53, G3=55, A3=57, B3=59
+C4=60, D4=62, E4=64, F4=65, G4=67, A4=69, B4=71
+C5=72, D5=74, E5=76, F5=77, G5=79, A5=81, B5=83
+For flats: Eb4=63, Ab4=68, Bb4=70
+For sharps: C#4=61, F#4=66, G#4=68
+
+### Complete Example - Adding Notes to Measure 1
+
+```notateai
 var cursor = curScore.newCursor();
-cursor.rewind(Cursor.SCORE_START);  // Navigate to start
-cursor.setDuration(1, 4);           // Set quarter note duration
+cursor.rewind(Cursor.SCORE_START);
+cursor.staffIdx = 0;
+cursor.voice = 0;
+cursor.setDuration(1, 4);  // Quarter notes
 curScore.startCmd("Add Notes");
-cursor.addNote(60);                 // Add Middle C (MIDI pitch)
-cursor.addNote(62);                 // Add D
+cursor.addNote(60);  // C4
+cursor.addNote(62);  // D4
+cursor.addNote(64);  // E4
+cursor.addNote(65);  // F4
 curScore.endCmd();
 ```
 
-### Duration Values (setDuration(z, n) = z/n fraction)
-- Whole: (1,1), Half: (1,2), Quarter: (1,4), Eighth: (1,8), 16th: (1,16)
-- Dotted quarter: (3,8), Dotted half: (3,4), Dotted eighth: (3,16)
+### Navigating to a Specific Measure
 
-### MIDI Pitch Reference
-| Note | Oct 3 | Oct 4 | Oct 5 |
-|------|-------|-------|-------|
-| C    | 48    | 60    | 72    |
-| D    | 50    | 62    | 74    |
-| E    | 52    | 64    | 76    |
-| F    | 53    | 65    | 77    |
-| G    | 55    | 67    | 79    |
-| A    | 57    | 69    | 81    |
-| B    | 59    | 71    | 83    |
+There is NO goToMeasure() method. To navigate to measure N, use nextMeasure():
 
-Middle C (C4) = 60, Concert A (A4) = 69
-
-### Building Chords
-```javascript
-cursor.addNote(60, false);  // C (new chord)
-cursor.addNote(64, true);   // Add E to chord
-cursor.addNote(67, true);   // Add G to chord (C major)
+```notateai
+var cursor = curScore.newCursor();
+cursor.rewind(Cursor.SCORE_START);
+// To go to measure 3 (0-indexed, so this is the 3rd measure):
+cursor.nextMeasure();  // Now at measure 1
+cursor.nextMeasure();  // Now at measure 2
+// Now cursor is at measure 3
 ```
 
-### Common Actions via cmd()
-```javascript
-cmd("note-input");           // Toggle note input mode
-cmd("note-c");               // Enter C
-cmd("rest");                 // Enter rest
-cmd("pitch-up");             // Pitch up semitone
-cmd("pitch-down");           // Pitch down semitone
-cmd("pitch-up-octave");      // Up octave
-cmd("pitch-down-octave");    // Down octave
-cmd("tie");                  // Add tie
-cmd("add-slur");             // Add slur
-cmd("triplet");              // Enter triplet
-cmd("pad-dot");              // Toggle dot
-cmd("flat");                 // Add flat
-cmd("sharp");                // Add sharp
-cmd("natural");              // Add natural
+OR use a loop:
+
+```notateai
+var cursor = curScore.newCursor();
+cursor.rewind(Cursor.SCORE_START);
+var targetMeasure = 2;  // 0-indexed
+for (var i = 0; i < targetMeasure; i++) {
+    cursor.nextMeasure();
+}
+// Now at measure 2
 ```
 
-### Navigation
-```javascript
-cursor.next();               // Next segment
-cursor.nextMeasure();        // Next measure
-cursor.rewind(Cursor.SCORE_START);      // Go to start
-cursor.rewind(Cursor.SELECTION_START);  // Go to selection start
+### Clearing a Measure's Content
+
+```notateai
+var cursor = curScore.newCursor();
+cursor.rewind(Cursor.SCORE_START);
+// Navigate to the measure first
+for (var i = 0; i < 1; i++) {  // Go to measure 1
+    cursor.nextMeasure();
+}
+curScore.startCmd("Clear Measure");
+// Delete all elements in this measure
+while (cursor.segment && cursor.measure.is(someMeasure)) {
+    var el = cursor.element;
+    if (el) {
+        removeElement(el);
+    }
+    cursor.next();
+}
+curScore.endCmd();
 ```
 
-### Adding Elements
-```javascript
-var text = newElement(Element.STAFF_TEXT);
-text.text = "pizz.";
-cursor.add(text);
+Note: Clearing measures is complex. It's often easier to add rests to overwrite content.
+
+### Duration Values - setDuration(numerator, denominator)
+- Whole note: cursor.setDuration(1, 1)
+- Half note: cursor.setDuration(1, 2)
+- Quarter note: cursor.setDuration(1, 4)
+- Eighth note: cursor.setDuration(1, 8)
+- 16th note: cursor.setDuration(1, 16)
+- Dotted quarter: cursor.setDuration(3, 8)  // 1/4 * 3/2 = 3/8
+- Dotted half: cursor.setDuration(3, 4)     // 1/2 * 3/2 = 3/4
+
+### Building Chords (multiple notes on same beat)
+
+```notateai
+var cursor = curScore.newCursor();
+cursor.rewind(Cursor.SCORE_START);
+cursor.setDuration(1, 1);  // Whole note
+curScore.startCmd("Add Chord");
+cursor.addNote(60, false);  // C4 - creates new chord
+cursor.addNote(64, true);   // E4 - adds to chord
+cursor.addNote(67, true);   // G4 - adds to chord (C major triad)
+curScore.endCmd();
 ```
 
-### Score Operations
-```javascript
-curScore.appendMeasures(4);  // Add 4 measures
-curScore.startCmd("Action Name");  // Start undo block
-curScore.endCmd();                  // End undo block
+### Adding Rests
+
+```notateai
+var cursor = curScore.newCursor();
+cursor.rewind(Cursor.SCORE_START);
+cursor.setDuration(1, 4);
+curScore.startCmd("Add Rest");
+cursor.addRest();
+curScore.endCmd();
 ```
 
-### Cursor Properties
-- `cursor.track` - Current track (staffIdx * 4 + voice)
-- `cursor.staffIdx` - Staff number
-- `cursor.voice` - Voice (0-3)
-- `cursor.element` - Element at cursor
-- `cursor.measure` - Current measure
+### Complete Example: Add Chords to Multiple Measures
+
+```notateai
+var cursor = curScore.newCursor();
+cursor.rewind(Cursor.SCORE_START);
+cursor.staffIdx = 0;
+cursor.voice = 0;
+
+curScore.startCmd("Add Chord Progression");
+
+// Measure 1 - C major chord (whole note)
+cursor.setDuration(1, 1);
+cursor.addNote(60, false);  // C
+cursor.addNote(64, true);   // E
+cursor.addNote(67, true);   // G
+
+// Move to measure 2
+cursor.nextMeasure();
+
+// Measure 2 - F major chord (whole note)
+cursor.setDuration(1, 1);
+cursor.addNote(65, false);  // F
+cursor.addNote(69, true);   // A
+cursor.addNote(72, true);   // C
+
+// Move to measure 3
+cursor.nextMeasure();
+
+// Measure 3 - G major chord (whole note)
+cursor.setDuration(1, 1);
+cursor.addNote(67, false);  // G
+cursor.addNote(71, true);   // B
+cursor.addNote(74, true);   // D
+
+curScore.endCmd();
+```
+
+### ALL Available Cursor Methods (DO NOT use methods not listed here):
+- cursor.rewind(Cursor.SCORE_START) - Go to start of score
+- cursor.rewind(Cursor.SELECTION_START) - Go to selection start
+- cursor.rewind(Cursor.SELECTION_END) - Go to selection end
+- cursor.next() - Move to next segment (returns false at end)
+- cursor.nextMeasure() - Move to next measure (returns false at end)
+- cursor.prev() - Move to previous segment
+- cursor.setDuration(numerator, denominator) - Set duration for notes/rests
+- cursor.addNote(pitch, addToChord) - Add note (pitch is MIDI number 0-127)
+- cursor.addRest() - Add rest with current duration
+- cursor.add(element) - Add an element
+
+### ALL Available Cursor Properties:
+- cursor.staffIdx - Staff number (0-indexed, read/write)
+- cursor.voice - Voice 0-3 (read/write)
+- cursor.tick - Current tick position (read only)
+- cursor.element - Current element (read only)
+- cursor.segment - Current segment (read only)
+- cursor.measure - Current measure (read only)
+
+### Score Methods:
+- curScore.startCmd("Command Name") - Start undo block (REQUIRED before modifications)
+- curScore.endCmd() - End undo block (REQUIRED after modifications)
+- curScore.newCursor() - Create new cursor
+- curScore.nmeasures - Number of measures (read only)
+- curScore.appendMeasures(n) - Add n measures to end of score
 )"
 ;
 

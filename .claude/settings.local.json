@@ -41,7 +41,8 @@
       "Bash(New-Item -ItemType Directory -Force -Path \"c:\\CodingProjects\\NotateAI\\NotateAI\\src\\notateai\\qml\")",
       "Bash(C:/Qt/Tools/mingw1310_64/bin/mingw32-make.exe:*)",
       "Bash(/c/Qt/Tools/mingw1310_64/bin/mingw32-make.exe:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
