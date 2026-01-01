@@ -23,7 +23,7 @@ import QtQuick 2.15
 
 import Muse.Ui 1.0
 import Muse.UiComponents 1.0
-import MuseScore.AppShell 1.0
+import NotateAI.AppShell 1.0
 import Muse.Dock 1.0
 
 import MuseScore.NotationScene 1.0
@@ -35,7 +35,7 @@ DockPage {
     id: root
 
     objectName: "Publish"
-    uri: "musescore://publish"
+    uri: "notateai://publish"
 
     required property NavigationSection topToolbarKeyNavSec
 

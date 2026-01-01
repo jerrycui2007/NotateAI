@@ -21,7 +21,7 @@
  */
 import QtQuick 2.15
 
-import MuseScore.Preferences 1.0
+import NotateAI.Preferences 1.0
 import Muse.Shortcuts 1.0
 
 PreferencesPage {

@@ -49,11 +49,11 @@ using namespace mu::notation;
 using namespace muse;
 using namespace muse::actions;
 
-static const muse::Uri NOTATION_PAGE_URI("musescore://notation");
-static const muse::Uri HOME_PAGE_URI("musescore://home");
-static const muse::Uri NEW_SCORE_URI("musescore://project/newscore");
-static const muse::Uri PROJECT_PROPERTIES_URI("musescore://project/properties");
-static const muse::Uri UPLOAD_PROGRESS_URI("musescore://project/upload/progress");
+static const muse::Uri NOTATION_PAGE_URI("notateai://notation");
+static const muse::Uri HOME_PAGE_URI("notateai://home");
+static const muse::Uri NEW_SCORE_URI("notateai://project/newscore");
+static const muse::Uri PROJECT_PROPERTIES_URI("notateai://project/properties");
+static const muse::Uri UPLOAD_PROGRESS_URI("notateai://project/upload/progress");
 
 static const QString MUSESCORE_URL_SCHEME("musescore");
 static const QString OPEN_SCORE_URL_HOSTNAME("open-score");
@@ -1129,7 +1129,7 @@ void ProjectActionsController::alsoShareAudioCom(const AudioFile& audio)
         return;
     }
 
-    UriQuery query("musescore://project/alsoshareaudiocom");
+    UriQuery query("notateai://project/alsoshareaudiocom");
     query.addParam("rememberChoice", Val(!configuration()->hasAskedAlsoShareAudioCom()));
     RetVal<Val> rv = interactive()->openSync(query);
 
@@ -1151,7 +1151,7 @@ void ProjectActionsController::alsoShareAudioCom(const AudioFile& audio)
 
 Ret ProjectActionsController::askAudioGenerationSettings() const
 {
-    RetVal<Val> res = interactive()->openSync("musescore://project/audiogenerationsettings");
+    RetVal<Val> res = interactive()->openSync("notateai://project/audiogenerationsettings");
     if (!res.ret) {
         return res.ret;
     }
@@ -1388,7 +1388,7 @@ void ProjectActionsController::onProjectSuccessfullyUploaded(const QUrl& urlToOp
     QUrl scoreManagerUrl = this->scoreManagerUrl();
 
     if (configuration()->openDetailedProjectUploadedDialog()) {
-        UriQuery query("musescore://project/upload/success");
+        UriQuery query("notateai://project/upload/success");
         query.addParam("scoreManagerUrl", Val(scoreManagerUrl.toString()));
         interactive()->open(query);
         configuration()->setOpenDetailedProjectUploadedDialog(false);
@@ -1879,7 +1879,7 @@ void ProjectActionsController::continueLastSession()
 
 void ProjectActionsController::exportScore()
 {
-    static const Uri EXPORT_URI("musescore://project/export");
+    static const Uri EXPORT_URI("notateai://project/export");
     if (!interactive()->isOpened(EXPORT_URI).val) {
         interactive()->open(EXPORT_URI);
     }

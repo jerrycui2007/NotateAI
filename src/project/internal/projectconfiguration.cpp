@@ -611,14 +611,8 @@ void ProjectConfiguration::setShouldDestinationFolderBeOpenedOnExport(bool shoul
 
 QUrl ProjectConfiguration::supportForumUrl() const
 {
-    if (languagesService()->currentLanguage().code.startsWith("en")) {
-        // The English support forum
-        return QUrl("https://musescore.org/forum/6");
-    }
-
-    // The general forum page, where the support forum is linked at the top
-    // (except in English; there you have the Announcements forum)
-    return QUrl("https://musescore.org/forum");
+    // NotateAI support forum
+    return QUrl("https://notateai.vercel.app/support");
 }
 
 bool ProjectConfiguration::openDetailedProjectUploadedDialog() const

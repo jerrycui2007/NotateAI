@@ -39,7 +39,7 @@ static const Settings::Key DEV_MODE_ENABLED_KEY("global", "application/devModeEn
 static const Settings::Key METRIC_UNIT_KEY("global", "application/metricUnit");
 static const Settings::Key HIGH_RESOLUTION_TIMERS("global", "application/highResolutionTimers");
 
-static const std::string MUSESCORE_URL("https://www.musescore.org/");
+static const std::string MUSESCORE_URL("https://notateai.vercel.app/");
 static const std::string MUSEHUB_WEB_URL("https://www.musehub.com/");
 
 void GlobalConfiguration::init()

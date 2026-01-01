@@ -38,7 +38,7 @@ DockPage {
     id: root
 
     objectName: "DevTools"
-    uri: "musescore://devtools"
+    uri: "notateai://devtools"
 
     function setCurrentCentral(name) {
         switch (name) {

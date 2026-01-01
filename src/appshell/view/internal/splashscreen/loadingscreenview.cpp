@@ -38,7 +38,7 @@ static constexpr QSize loadingScreenSize(810, 406);
 static const QColor messageColor("#F1F1EE");
 static constexpr QRectF messageRect(48, 230, 0, 0);
 
-static const QString website("www.musescore.org");
+static const QString website("notateai.vercel.app");
 static constexpr QRectF websiteRect(loadingScreenSize.width() - 48, loadingScreenSize.height() - 48, 0, 0);
 
 static const QColor versionNumberColor("#19F3FF");

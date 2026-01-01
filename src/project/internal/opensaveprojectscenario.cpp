@@ -144,7 +144,7 @@ RetVal<SaveLocationType> OpenSaveProjectScenario::saveLocationType() const
 
 RetVal<SaveLocationType> OpenSaveProjectScenario::askSaveLocationType() const
 {
-    UriQuery query("musescore://project/asksavelocationtype");
+    UriQuery query("notateai://project/asksavelocationtype");
     bool shouldAsk = configuration()->shouldAskSaveLocationType();
     query.addParam("askAgain", Val(shouldAsk));
 
@@ -189,7 +189,7 @@ RetVal<CloudAudioInfo> OpenSaveProjectScenario::askShareAudioLocation(INotationP
     QUrl uploadUrl = project->cloudAudioInfo().url;
     cloud::Visibility defaultVisibility = cloud::Visibility::Public;
 
-    UriQuery query("musescore://project/savetocloud");
+    UriQuery query("notateai://project/savetocloud");
     query.addParam("isPublishShare", Val(true));
     query.addParam("name", Val(defaultName));
     query.addParam("visibility", Val(defaultVisibility));
@@ -291,7 +291,7 @@ RetVal<CloudProjectInfo> OpenSaveProjectScenario::doAskCloudLocation(INotationPr
         }
     }
 
-    UriQuery query("musescore://project/savetocloud");
+    UriQuery query("notateai://project/savetocloud");
     query.addParam("isPublishShare", Val(isPublishShare));
     query.addParam("name", Val(defaultName));
     query.addParam("visibility", Val(defaultVisibility));

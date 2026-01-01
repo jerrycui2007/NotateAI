@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2018-2025 MuseScore Limited and others -->
+<!-- Copyright 2025 NotateAI -->
 <component type="desktop-application">
     <!--
         Please write XML tags in the order they are specified in
@@ -9,15 +9,15 @@
             $  appstreamcli validate [filename]
             $  appstream-util validate [filename]
     -->
-    <id>org.musescore.MuseScore@MUSE_APP_INSTALL_SUFFIX@</id>
+    <id>org.notateai.NotateAI@MUSE_APP_INSTALL_SUFFIX@</id>
     <metadata_license>CC0-1.0</metadata_license><!-- License of this file -->
     <project_license>GPL-3.0-only</project_license>
-    <name>MuseScore</name>
-    <summary>Create, play and print beautiful sheet music</summary>
+    <name>NotateAI</name>
+    <summary>Create, play and print beautiful sheet music with AI assistance</summary>
     <description>
-        <p>MuseScore is cross-platform, multi-lingual, open source music notation software. It features an easy to use WYSIWYG editor with audio score playback for results that look and sound beautiful. It supports unlimited staves with up to four voices each, dynamics, articulations, lyrics, chords, lead sheet notation, import/export of MIDI and MusicXML, export to PDF and WAV, plus online score sharing.</p>
-        <p>MuseScore can upload scores directly to the score sharing site musescore.com. Program support is provided on musescore.org.</p>
-        <p>Features supported by MuseScore include:</p>
+        <p>NotateAI is cross-platform, multi-lingual, open source music notation software with AI-powered features. It features an easy to use WYSIWYG editor with audio score playback for results that look and sound beautiful. It supports unlimited staves with up to four voices each, dynamics, articulations, lyrics, chords, lead sheet notation, import/export of MIDI and MusicXML, export to PDF and WAV, plus online score sharing.</p>
+        <p>NotateAI can upload scores directly to the score sharing site musescore.com. Program support is provided at notateai.vercel.app.</p>
+        <p>Features supported by NotateAI include:</p>
         <ul>
             <li>Unlimited score length</li>
             <li>Unlimited number of staves per system</li>
@@ -40,26 +40,23 @@
             <li>Additive time signatures</li>
             <li>User-defined score styles</li>
         </ul>
-        <p>Most elements in MuseScore are laid out automatically but can also be positioned manually. The capabilities of MuseScore can be extended via plugins, and the growing repository on musescore.org contains many plugins submitted by users.</p>
-        <p>MuseScore includes a set of sounds that reproduce common instruments (as defined by General MIDI) without taking up a lot of disk space or memory, but you can also substitute any SoundFont you prefer for a wider variety of sounds or for more realism.</p>
-        <p>MuseScore can import and export MIDI and MusicXML files, and it can also import from Capella and several other programs. MuseScore can export to PDF, PNG, and other graphic formats, to WAV and other audio formats, or to Lilypond for an alternative layout and print option.</p>
+        <p>Most elements in NotateAI are laid out automatically but can also be positioned manually. The capabilities of NotateAI can be extended via plugins.</p>
+        <p>NotateAI includes a set of sounds that reproduce common instruments (as defined by General MIDI) without taking up a lot of disk space or memory, but you can also substitute any SoundFont you prefer for a wider variety of sounds or for more realism.</p>
+        <p>NotateAI can import and export MIDI and MusicXML files, and it can also import from Capella and several other programs. NotateAI can export to PDF, PNG, and other graphic formats, to WAV and other audio formats, or to Lilypond for an alternative layout and print option.</p>
     </description>
     <!-- <categories> in .desktop file -->
     <!-- <keywords> in .desktop file -->
-    <url type="homepage">https://musescore.org</url>
-    <url type="bugtracker">https://github.com/musescore/MuseScore/issues</url>
-    <url type="faq">https://musescore.org/en/faq</url>
-    <url type="help">https://handbook.musescore.org</url>
-    <url type="donation">https://musescore.org/en/donate</url>
-    <url type="translate">https://github.com/musescore/MuseScore/wiki/Help-translate-MuseScore</url>
-    <url type="contact">https://musescore.org/en/forum/6</url>
-    <url type="vcs-browser">https://github.com/musescore/MuseScore</url>
-    <url type="contribute">https://musescore.org/en/contribute</url>
-    <launchable type="desktop-id">org.musescore.MuseScore@MUSE_APP_INSTALL_SUFFIX@.desktop</launchable>
+    <url type="homepage">https://notateai.vercel.app</url>
+    <url type="bugtracker">https://notateai.vercel.app/issues</url>
+    <url type="faq">https://notateai.vercel.app/faq</url>
+    <url type="help">https://notateai.vercel.app/handbook</url>
+    <url type="contact">https://notateai.vercel.app/support</url>
+    <url type="contribute">https://notateai.vercel.app/contribute</url>
+    <launchable type="desktop-id">org.notateai.NotateAI@MUSE_APP_INSTALL_SUFFIX@.desktop</launchable>
     <provides>
         <!-- <mediatype> in .desktop file as MimeType -->
-        <binary>mscore@MUSE_APP_INSTALL_SUFFIX@</binary>
-        <id>org.musescore.MuseScore@MUSE_APP_INSTALL_SUFFIX@.desktop</id>
+        <binary>notateai@MUSE_APP_INSTALL_SUFFIX@</binary>
+        <id>org.notateai.NotateAI@MUSE_APP_INSTALL_SUFFIX@.desktop</id>
     </provides>
     <!-- <releases> moved to bottom of this file to keep it out the way -->
     <supports>
@@ -69,8 +66,8 @@
         <control>touch</control>
         <internet>always</internet>
     </supports>
-    <developer id="org.musescore">
-        <name>MuseScore Limited</name>
+    <developer id="org.notateai">
+        <name>NotateAI</name>
     </developer>
     <screenshots>
         <screenshot type="default">

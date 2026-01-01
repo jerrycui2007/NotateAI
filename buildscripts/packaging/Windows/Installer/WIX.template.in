@@ -50,8 +50,8 @@
         <WixVariable Id="WixUIDialogBmp" Value="$(var.CPACK_WIX_UI_DIALOG)" />
         <?endif?>
 
-        <Property Id='ARPHELPLINK'>https://musescore.org</Property>
-        <Property Id='ARPURLINFOABOUT'>https://musescore.org</Property>
+        <Property Id='ARPHELPLINK'>https://notateai.vercel.app</Property>
+        <Property Id='ARPURLINFOABOUT'>https://notateai.vercel.app</Property>
         <!-- Properties from CMake -->
         <?include "properties.wxi"?>
 

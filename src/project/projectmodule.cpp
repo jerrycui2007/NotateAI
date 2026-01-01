@@ -122,16 +122,16 @@ void ProjectModule::resolveImports()
 
     auto ir = ioc()->resolve<muse::ui::IInteractiveUriRegister>(moduleName());
     if (ir) {
-        ir->registerQmlUri(Uri("musescore://project/newscore"), "MuseScore/Project/NewScoreDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/asksavelocationtype"), "MuseScore/Project/AskSaveLocationTypeDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/savetocloud"), "MuseScore/Project/SaveToCloudDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/alsoshareaudiocom"), "MuseScore/Project/AlsoShareAudioComDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/export"), "MuseScore/Project/ExportDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/migration"), "MuseScore/Project/MigrationDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/properties"), "MuseScore/Project/ProjectPropertiesDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/upload/progress"), "MuseScore/Project/UploadProgressDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/upload/success"), "MuseScore/Project/ProjectUploadedDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/audiogenerationsettings"), "MuseScore/Project/AudioGenerationSettingsDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/newscore"), "MuseScore/Project/NewScoreDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/asksavelocationtype"), "MuseScore/Project/AskSaveLocationTypeDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/savetocloud"), "MuseScore/Project/SaveToCloudDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/alsoshareaudiocom"), "MuseScore/Project/AlsoShareAudioComDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/export"), "MuseScore/Project/ExportDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/migration"), "MuseScore/Project/MigrationDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/properties"), "MuseScore/Project/ProjectPropertiesDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/upload/progress"), "MuseScore/Project/UploadProgressDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/upload/success"), "MuseScore/Project/ProjectUploadedDialog.qml");
+        ir->registerQmlUri(Uri("notateai://project/audiogenerationsettings"), "MuseScore/Project/AudioGenerationSettingsDialog.qml");
     }
 
     auto er = ioc()->resolve<muse::extensions::IExtensionsExecPointsRegister>(moduleName());

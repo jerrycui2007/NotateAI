@@ -60,7 +60,7 @@ void ApplicationActionController::init()
 
     dispatcher()->reg(this, "fullscreen", this, &ApplicationActionController::toggleFullScreen);
 
-    dispatcher()->reg(this, "about-musescore", this, &ApplicationActionController::openAboutDialog);
+    dispatcher()->reg(this, "about-notateai", this, &ApplicationActionController::openAboutDialog);
     dispatcher()->reg(this, "about-qt", this, &ApplicationActionController::openAboutQtDialog);
     dispatcher()->reg(this, "about-musicxml", this, &ApplicationActionController::openAboutMusicXMLDialog);
     dispatcher()->reg(this, "online-handbook", this, &ApplicationActionController::openOnlineHandbookPage);
@@ -70,7 +70,7 @@ void ApplicationActionController::init()
     dispatcher()->reg(this, "revert-factory", this, &ApplicationActionController::revertToFactorySettings);
 
     dispatcher()->reg(this, "manage-plugins", [this]() {
-        interactive()->open("musescore://home?section=plugins");
+        interactive()->open("notateai://home?section=plugins");
     });
 
     // Global actions
@@ -268,7 +268,7 @@ void ApplicationActionController::toggleFullScreen()
 
 void ApplicationActionController::openAboutDialog()
 {
-    interactive()->open("musescore://about/musescore");
+    interactive()->open("notateai://about/notateai");
 }
 
 void ApplicationActionController::openAboutQtDialog()
@@ -278,7 +278,7 @@ void ApplicationActionController::openAboutQtDialog()
 
 void ApplicationActionController::openAboutMusicXMLDialog()
 {
-    interactive()->open("musescore://about/musicxml");
+    interactive()->open("notateai://about/musicxml");
 }
 
 void ApplicationActionController::openOnlineHandbookPage()
@@ -349,8 +349,8 @@ void ApplicationActionController::revertToFactorySettings()
         static constexpr bool NOTIFY_OTHER_INSTANCES = false;
         configuration()->revertToFactorySettings(KEEP_DEFAULT_SETTINGS, NOTIFY_ABOUT_CHANGES, NOTIFY_OTHER_INSTANCES);
 
-        std::string title = muse::trc("appshell", "Would you like to restart MuseScore Studio now?");
-        std::string question = muse::trc("appshell", "MuseScore Studio needs to be restarted for these changes to take effect.");
+        std::string title = muse::trc("appshell", "Would you like to restart NotateAI now?");
+        std::string question = muse::trc("appshell", "NotateAI needs to be restarted for these changes to take effect.");
 
         int restartBtn = int(IInteractive::Button::Apply);
         auto promise = interactive()->question(title, question,

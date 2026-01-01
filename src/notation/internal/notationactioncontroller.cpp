@@ -1660,9 +1660,9 @@ void NotationActionController::openSelectionMoreOptions()
     bool noteSelected = item->isNote();
 
     if (noteSelected) {
-        interactive()->open("musescore://notation/selectnote");
+        interactive()->open("notateai://notation/selectnote");
     } else {
-        interactive()->open("musescore://notation/selectelement");
+        interactive()->open("notateai://notation/selectelement");
     }
 }
 
@@ -1738,7 +1738,7 @@ void NotationActionController::addMeasures(const ActionData& actionData, AddBoxe
         int count = actionData.arg<int>();
         addBoxes(BoxType::Measure, count, target);
     } else {
-        interactive()->open("musescore://notation/selectmeasurescount")
+        interactive()->open("notateai://notation/selectmeasurescount")
         .onResolve(this, [this, target](const Val& v) {
             int count = v.toInt();
             addBoxes(BoxType::Measure, count, target);
@@ -1823,7 +1823,7 @@ void NotationActionController::resetBeamMode()
 
 void NotationActionController::openEditStyleDialog(const ActionData& args)
 {
-    UriQuery uri("musescore://notation/style");
+    UriQuery uri("notateai://notation/style");
 
     if (args.count() > 0) {
         uri.addParam("currentPageCode", Val(args.arg<QString>(0)));
@@ -1838,32 +1838,32 @@ void NotationActionController::openEditStyleDialog(const ActionData& args)
 
 void NotationActionController::openPageSettingsDialog()
 {
-    interactive()->open("musescore://notation/pagesettings");
+    interactive()->open("notateai://notation/pagesettings");
 }
 
 void NotationActionController::openStaffProperties()
 {
-    interactive()->open("musescore://notation/staffproperties");
+    interactive()->open("notateai://notation/staffproperties");
 }
 
 void NotationActionController::openEditStringsDialog()
 {
-    interactive()->open("musescore://notation/editstrings");
+    interactive()->open("notateai://notation/editstrings");
 }
 
 void NotationActionController::openBreaksDialog()
 {
-    interactive()->open("musescore://notation/breaks");
+    interactive()->open("notateai://notation/breaks");
 }
 
 void NotationActionController::openTransposeDialog()
 {
-    interactive()->open("musescore://notation/transpose");
+    interactive()->open("notateai://notation/transpose");
 }
 
 void NotationActionController::openPartsDialog()
 {
-    interactive()->open("musescore://notation/parts");
+    interactive()->open("notateai://notation/parts");
 }
 
 muse::io::path_t NotationActionController::selectStyleFile(bool forLoad)
@@ -2143,29 +2143,29 @@ bool NotationActionController::isNotNoteInputMode() const
 
 void NotationActionController::openTupletOtherDialog()
 {
-    interactive()->open("musescore://notation/othertupletdialog");
+    interactive()->open("notateai://notation/othertupletdialog");
 }
 
 void NotationActionController::openStaffTextPropertiesDialog()
 {
-    interactive()->open("musescore://notation/stafftextproperties");
+    interactive()->open("notateai://notation/stafftextproperties");
 }
 
 void NotationActionController::openMeasurePropertiesDialog()
 {
     if (currentNotationInteraction()->selectedMeasure() != nullptr) {
-        interactive()->open("musescore://notation/measureproperties");
+        interactive()->open("notateai://notation/measureproperties");
     }
 }
 
 void NotationActionController::openEditGridSizeDialog()
 {
-    interactive()->open("musescore://notation/editgridsize");
+    interactive()->open("notateai://notation/editgridsize");
 }
 
 void NotationActionController::openRealizeChordSymbolsDialog()
 {
-    interactive()->open("musescore://notation/realizechordsymbols");
+    interactive()->open("notateai://notation/realizechordsymbols");
 }
 
 void NotationActionController::toggleScoreConfig(ScoreConfigType configType)

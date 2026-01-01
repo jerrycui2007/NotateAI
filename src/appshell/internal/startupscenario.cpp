@@ -34,10 +34,10 @@ using namespace mu::appshell;
 using namespace muse;
 using namespace muse::actions;
 
-static const muse::UriQuery FIRST_LAUNCH_SETUP_URI("musescore://firstLaunchSetup?floating=true");
-static const muse::UriQuery WELCOME_DIALOG_URI("musescore://welcomedialog");
-static const muse::Uri HOME_URI("musescore://home");
-static const muse::Uri NOTATION_URI("musescore://notation");
+static const muse::UriQuery FIRST_LAUNCH_SETUP_URI("notateai://firstLaunchSetup?floating=true");
+static const muse::UriQuery WELCOME_DIALOG_URI("notateai://welcomedialog");
+static const muse::Uri HOME_URI("notateai://home");
+static const muse::Uri NOTATION_URI("notateai://notation");
 
 static constexpr int CHECK_FOR_UPDATES_TIMEOUT(7500);
 

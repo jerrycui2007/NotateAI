@@ -24,7 +24,7 @@ import QtQuick 2.15
 import Muse.Ui 1.0
 import Muse.UiComponents 1.0
 
-import MuseScore.AppShell 1.0
+import NotateAI.AppShell 1.0
 
 StyledToolBarView {
     navigationPanel.name: "PublishToolBar"

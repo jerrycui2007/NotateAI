@@ -26,7 +26,7 @@ import QtQuick.Layouts
 import Muse.Ui 1.0
 import Muse.UiComponents 1.0
 
-import MuseScore.AppShell 1.0
+import NotateAI.AppShell 1.0
 import MuseScore.Playback 1.0
 
 AppWindow {

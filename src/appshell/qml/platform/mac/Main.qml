@@ -21,7 +21,7 @@
  */
 import QtQuick 2.15
 
-import MuseScore.AppShell 1.0
+import NotateAI.AppShell 1.0
 
 import "../"
 import "../../"

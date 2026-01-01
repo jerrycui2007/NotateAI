@@ -26,10 +26,10 @@
 
 using namespace mu::appshell;
 
-static const QString HOME_PAGE("musescore://home");
-static const QString NOTATION_PAGE("musescore://notation");
-static const QString PUBLISH_PAGE("musescore://publish");
-static const QString DEVTOOLS_PAGE("musescore://devtools");
+static const QString HOME_PAGE("notateai://home");
+static const QString NOTATION_PAGE("notateai://notation");
+static const QString PUBLISH_PAGE("notateai://publish");
+static const QString DEVTOOLS_PAGE("notateai://devtools");
 
 static const QString TITLE_KEY("title");
 static const QString URI_KEY("uri");

@@ -27,10 +27,10 @@ using namespace muse;
 using namespace muse::ui;
 using namespace muse::actions;
 
-static const muse::UriQuery MASTER_PALETTE_URI("musescore://palette/masterpalette?modal=false");
-static const muse::UriQuery SPECIAL_CHARACTERS_URI("musescore://palette/specialcharacters?modal=false");
-static const muse::UriQuery TIME_SIGNATURE_PROPERTIES_URI("musescore://palette/timesignatureproperties");
-static const muse::UriQuery CUSTOMIZE_KIT_URI("musescore://palette/customizekit");
+static const muse::UriQuery MASTER_PALETTE_URI("notateai://palette/masterpalette?modal=false");
+static const muse::UriQuery SPECIAL_CHARACTERS_URI("notateai://palette/specialcharacters?modal=false");
+static const muse::UriQuery TIME_SIGNATURE_PROPERTIES_URI("notateai://palette/timesignatureproperties");
+static const muse::UriQuery CUSTOMIZE_KIT_URI("notateai://palette/customizekit");
 
 void PaletteActionsController::init()
 {

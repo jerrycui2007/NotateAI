@@ -24,7 +24,7 @@ import QtQuick.Controls 2.15
 
 import Muse.Ui 1.0
 import Muse.UiComponents 1.0
-import MuseScore.AppShell 1.0
+import NotateAI.AppShell 1.0
 
 Item {
     id: root
@@ -34,7 +34,7 @@ Item {
 
     property alias navigation: navPanel
 
-    property string currentUri: "musescore://home"
+    property string currentUri: "notateai://home"
 
     signal selected(string uri)
 

@@ -46,7 +46,7 @@ static const Settings::Key WELCOME_DIALOG_LAST_SHOWN_INDEX(module_name, "applica
 static const Settings::Key STARTUP_MODE_TYPE(module_name, "application/startup/modeStart");
 static const Settings::Key STARTUP_SCORE_PATH(module_name, "application/startup/startScore");
 
-static const std::string MUSESCORE_ONLINE_HANDBOOK_URL("https://handbook.musescore.org");
+static const std::string MUSESCORE_ONLINE_HANDBOOK_URL("https://notateai.vercel.app/handbook");
 
 static const std::string MUSESCORE_ASK_FOR_HELP_URL_PATH("/redirect/post/question");
 static const std::string MUSESCORE_FORUM_URL_PATH("/forum");

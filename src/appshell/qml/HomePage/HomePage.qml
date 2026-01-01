@@ -39,7 +39,7 @@ DockPage {
     property var window: null
 
     objectName: "Home"
-    uri: "musescore://home"
+    uri: "notateai://home"
 
     onSetParamsRequested: function(params) {
         if (Boolean(params["section"])) {

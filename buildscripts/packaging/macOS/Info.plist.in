@@ -590,10 +590,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.musescore.musescore.musescoreurl</string>
+			<string>org.notateai.notateai.notateaiurl</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>musescore</string>
+				<string>notateai</string>
 			</array>
 		</dict>
 	</array>

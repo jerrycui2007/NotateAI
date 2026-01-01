@@ -43,7 +43,8 @@ void UpdateConfiguration::init()
 {
     m_config = ConfigReader::read(":/configs/update.cfg");
 
-    settings()->setDefaultValue(CHECK_FOR_UPDATE_KEY, Val(isAppUpdatable()));
+    // Disable update checking by default for NotateAI
+    settings()->setDefaultValue(CHECK_FOR_UPDATE_KEY, Val(false));
     settings()->valueChanged(CHECK_FOR_UPDATE_KEY).onReceive(this, [this](const Val&) {
         m_needCheckForUpdateChanged.notify();
     });

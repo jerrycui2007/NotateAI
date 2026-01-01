@@ -26,7 +26,7 @@ import Muse.Ui 1.0
 import Muse.UiComponents 1.0
 import Muse.Dock 1.0
 import Muse.Extensions 1.0
-import MuseScore.AppShell 1.0
+import NotateAI.AppShell 1.0
 
 import MuseScore.NotationScene 1.0
 import MuseScore.Palette 1.0
@@ -38,7 +38,7 @@ DockPage {
     id: root
 
     objectName: "Notation"
-    uri: "musescore://notation"
+    uri: "notateai://notation"
 
     required property NavigationSection topToolbarKeyNavSec
 

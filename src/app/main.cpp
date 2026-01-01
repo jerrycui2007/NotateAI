@@ -124,15 +124,14 @@ int main(int argc, char** argv)
 
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(250);
 
-// Can't use MUSE_APP_TITLE until next major release, because this "application name" is used to determine
-// where user settings are stored. Changing it would result in all user settings being lost.
+// Application name used for settings storage location
 #ifdef MUSE_APP_UNSTABLE
-    QCoreApplication::setApplicationName("MuseScore4Development");
+    QCoreApplication::setApplicationName("NotateAIDevelopment");
 #else
-    QCoreApplication::setApplicationName("MuseScore4");
+    QCoreApplication::setApplicationName("NotateAI");
 #endif
-    QCoreApplication::setOrganizationName("MuseScore");
-    QCoreApplication::setOrganizationDomain("musescore.org");
+    QCoreApplication::setOrganizationName("NotateAI");
+    QCoreApplication::setOrganizationDomain("notateai.vercel.app");
     QCoreApplication::setApplicationVersion(MUSE_APP_VERSION);
 
 #if !defined(Q_OS_WIN) && !defined(Q_OS_DARWIN) && !defined(Q_OS_WASM)
@@ -140,7 +139,7 @@ int main(int argc, char** argv)
 #ifndef MUSE_APP_INSTALL_SUFFIX
 #define MUSE_APP_INSTALL_SUFFIX ""
 #endif
-    QGuiApplication::setDesktopFileName("org.musescore.MuseScore" MUSE_APP_INSTALL_SUFFIX);
+    QGuiApplication::setDesktopFileName("org.notateai.NotateAI" MUSE_APP_INSTALL_SUFFIX);
 #endif
 
 #if (defined (_MSCVER) || defined (_MSC_VER))
